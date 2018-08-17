@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+    id "com.github.hierynomus.license" version "0.14.0"
+}
+
+group 'kr.projectn.vdl'
+version '1.0.0'
+
+sourceCompatibility = 1.8
+
+jar {
+    manifest {
+        attributes('Implementation-Title': project.name,
+                'Implementation-Version': project.version)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+
+license {
+    strictCheck true
+    ext.year = '2016-' + Calendar.getInstance().get(Calendar.YEAR)
+    ext.name = 'qscx9512'
+    ext.email = 'moonrise917@gmail.com'
+
+    exclude "test/*"
+}
+
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.7' //Apache Commons Lang library
+    implementation group: 'com.comcast', name: 'hlsparserj', version: '1.0.0' //HLS parser library
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0' //Logging library
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5' //JSON parser
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6' //Apache HttpClent
+    implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.5.6' //Apache HttpClient Fluent API
+    implementation group: 'commons-io', name: 'commons-io', version: '2.6' //Apache Commons IO
+    implementation group: 'commons-validator', name: 'commons-validator', version: '1.6'
+
+}
