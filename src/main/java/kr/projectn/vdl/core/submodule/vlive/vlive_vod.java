@@ -1,12 +1,12 @@
 /**
  * Copyright 2016-2018 qscx9512 <moonrise917@gmail.com>
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,9 +19,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import kr.projectn.vdl.core.Request;
+import kr.projectn.vdl.core.RequestBuilder;
 import kr.projectn.vdl.core.Response;
 import kr.projectn.vdl.core.frame.ResponseStatus;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
+import kr.projectn.vdl.core.frame.SubmoduleMessageEvent;
 import kr.projectn.vdl.core.util.Regex;
 import kr.projectn.vdl.core.util.WebClient;
 import org.apache.http.NameValuePair;
@@ -36,32 +39,32 @@ public class vlive_vod extends SubmoduleFrame {
     private String status;
     private String vid_long;
     private String key;
-
     private Regex regex;
 
-    public vlive_vod(String url) {
-        super(url);
+    public vlive_vod(Request req) {
+        super(req);
     }
 
-    @Override
+
     protected void parsePage() {
         regex = new Regex();
+
+        bus.post(new SubmoduleMessageEvent(moduleStr, Thread.currentThread().getStackTrace()[1].getMethodName()));
 
         if (regex.setRegexString("\\bvlive\\.video\\.init\\(([^)]+)\\)")
                 .setSplitString("[\\s\\W]*,[\\s\\W]*")
                 .setExpressionString(initPage)
                 .split()
         ) {
-            status = regex.getSplitGroup().get(2);
-            vid_long = regex.getSplitGroup().get(5);
-            key = regex.getSplitGroup().get(6);
+            status = regex.getSplitGroup().get(2).replace("\"", "");
+            vid_long = regex.getSplitGroup().get(5).replace("\"", "");
+            key = regex.getSplitGroup().get(6).replace("\"", "");
         }
 
         switch (status) {
             case "LIVE_ON_AIR":
             case "BIG_EVENT_ON_AIR":
-                response = new vlive_Realtime(super.url)
-                        .run();
+                response = new vlive_Realtime(new RequestBuilder().setUrl(url).build()).run();
                 break;
             case "VOD_ON_AIR":
             case "BIG_EVENT_INTRO":
@@ -75,10 +78,13 @@ public class vlive_vod extends SubmoduleFrame {
             case "CANCELED":
                 response.setStatus(ResponseStatus.LIVE_CANCELED);
                 break;
+            case "PRODUCT_ONLY_APP":
+                response.setStatus(ResponseStatus.PRODUCT_ONLY_APP);
         }
+
     }
 
-    @Override
+
     protected void retrieveMediaSpec() {
         WebClient client = new WebClient();
         List<NameValuePair> reqParam = new ArrayList<NameValuePair>();
@@ -86,6 +92,8 @@ public class vlive_vod extends SubmoduleFrame {
         Stack<String> videoRes = new Stack<>();
         Stack<String> cdnUrl = new Stack<>();
         Stack<Long> fSize = new Stack<>();
+
+        bus.post(new SubmoduleMessageEvent(moduleStr, Thread.currentThread().getStackTrace()[1].getMethodName()));
 
         reqParam.add(new BasicNameValuePair("videoId", vid_long));
         reqParam.add(new BasicNameValuePair("key", key));
@@ -97,17 +105,15 @@ public class vlive_vod extends SubmoduleFrame {
                 .setConnectionParameter(reqParam);
 
         JsonObject mediaJsonObj = new JsonParser().parse(
-                client.request("get").getAsString()
+                client.request().getAsString()
         ).getAsJsonObject();
 
         if (!(title = mediaJsonObj.get("meta").getAsJsonObject()
                 .get("subject").getAsString()).isEmpty()) {
             response.setTitle(title);
         } else {
-            client.setClientConnection(super.url);
-
-            if (regex.setRegexString("og:title.+(\\[[^\"]*+)")
-                    .setExpressionString(client.request("get").getAsString())
+            if (regex.setRegexString("og\\:title.+(\\[[^\"]*+)")
+                    .setExpressionString(initPage)
                     .group()) {
                 response.setTitle(regex.getMatchGroup().get(1));
             }
@@ -117,7 +123,7 @@ public class vlive_vod extends SubmoduleFrame {
                 .getAsJsonObject().getAsJsonArray("list");
 
         for (JsonElement it : videoSpecList) {
-            JsonObject obj = (JsonObject) it;
+            JsonObject obj = it.getAsJsonObject();
 
             videoRes.push(obj.get("encodingOption").getAsJsonObject()
                     .get("name").getAsString());
@@ -125,14 +131,31 @@ public class vlive_vod extends SubmoduleFrame {
             fSize.push(obj.get("size").getAsLong());
         }
 
+        if (mediaJsonObj.has("captions")) {
+            JsonArray subtitleList = mediaJsonObj.get("captions")
+                    .getAsJsonObject().get("list").getAsJsonArray();
+
+            for (JsonElement it : subtitleList) {
+                JsonObject obj = it.getAsJsonObject();
+
+                response.setSubtitle(0, obj.get("locale").getAsString(), obj.get("source").getAsString());
+            }
+        } else {
+            response.setSubtitle(0, "", "");
+        }
+
+
         response.setUrl(cdnUrl.pop());
         response.setResolution(videoRes.pop());
         response.setSize(fSize.pop());
     }
 
-    @Override
+
     protected Response getFinalMediaSpec() {
+        bus.post(new SubmoduleMessageEvent(moduleStr, Thread.currentThread().getStackTrace()[1].getMethodName()));
+
         response.setStatus(ResponseStatus.NOERR);
+        response.setSvctype(moduleStr);
         return response;
     }
 }
