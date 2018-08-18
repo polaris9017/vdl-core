@@ -45,6 +45,8 @@ public abstract class SubmoduleFrame {
      */
     protected EventBus bus;
 
+    protected int status;
+
     private SubmoduleFrame(SubmoduleCode subCode) {
         moduleStr = subCode.getSvcType();
     }
@@ -59,7 +61,9 @@ public abstract class SubmoduleFrame {
         this.url = req.getUrl();
         response = new Response();
         bus = new EventBus();
-        bus.register(new SubmoduleMessageListener());
+        //bus.register(new SubmoduleMessageListener());
+
+        status = StatusCode.STAT_EVENT.getCode();
     }
 
     /**
@@ -83,13 +87,14 @@ public abstract class SubmoduleFrame {
      * Request init page.
      */
     protected void requestInitPage() {
+        setStatus(StatusCode.E_INIT.getCode());
         WebClient client = new WebClient();
 
         initPage = client.setClientConnection(this.url)
                 .request()
                 .getAsString();
 
-        bus.post(new SubmoduleMessageEvent(moduleStr, Thread.currentThread().getStackTrace()[1].getMethodName()));
+        bus.post(this);
     }
 
     /**
@@ -108,4 +113,12 @@ public abstract class SubmoduleFrame {
      * @return the final media spec
      */
     protected abstract Response getFinalMediaSpec();
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status |= status;
+    }
 }
