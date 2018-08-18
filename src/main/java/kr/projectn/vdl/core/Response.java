@@ -15,9 +15,12 @@
  */
 package kr.projectn.vdl.core;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import kr.projectn.vdl.core.frame.ResponseStatus;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 
@@ -32,7 +35,7 @@ public class Response {
     private Queue<String> resolutionList;
     private Queue<String> urlList;
     private Queue<String> titleList;
-    private Queue<Subtitle> subtitleList;
+    private ListMultimap<String, Subtitle> subtitleList;
     private Queue<Long> sizeList;
     private String svctype;
     private ResponseStatus status;
@@ -43,7 +46,7 @@ public class Response {
         urlList = new LinkedList<>();
         titleList = new LinkedList<>();
         sizeList = new LinkedList<>();
-        subtitleList = new LinkedList<>();
+        subtitleList = ArrayListMultimap.create();
     }
 
     public void setUrl(String url) {
@@ -75,12 +78,21 @@ public class Response {
         title_op.ifPresent(el -> titleList.offer(el));
     }
 
-    public void setSubtitle(int index, String locale, String source) {
+    public void setSubtitle(String locale, String source) {
         subtitleLocale_op = Optional.ofNullable(locale);
         subtitleSource_op = Optional.ofNullable(source);
 
-        subtitleList.offer(new SubtitleBuilder()
-                .setIndex(index)
+        subtitleList.put(urlList.peek(), new SubtitleBuilder()
+                .setLocale(subtitleLocale_op.orElse(""))
+                .setSource(subtitleSource_op.orElse(""))
+                .build());
+    }
+
+    public void setSubtitle(String url, String locale, String source) {
+        subtitleLocale_op = Optional.ofNullable(locale);
+        subtitleSource_op = Optional.ofNullable(source);
+
+        subtitleList.put(url, new SubtitleBuilder()
                 .setLocale(subtitleLocale_op.orElse(""))
                 .setSource(subtitleSource_op.orElse(""))
                 .build());
@@ -110,8 +122,8 @@ public class Response {
         return svctype;
     }
 
-    public Queue<Subtitle> getSubtitleList() {
-        return subtitleList;
+    public List<Subtitle> getSubtitleList(String url) {
+        return subtitleList.get(url);
     }
 
     public boolean isEmpty() {
@@ -127,18 +139,12 @@ public class Response {
     }
 
     public class Subtitle {
-        private int index;
         private String locale;
         private String source;
 
-        public Subtitle(int index, String locale, String source) {
-            this.index = index;
+        public Subtitle(String locale, String source) {
             this.locale = locale;
             this.source = source;
-        }
-
-        public int getIndex() {
-            return index;
         }
 
         public String getLocale() {
@@ -151,14 +157,8 @@ public class Response {
     }
 
     private class SubtitleBuilder {
-        private int index;
         private String locale;
         private String source;
-
-        public SubtitleBuilder setIndex(int index) {
-            this.index = index;
-            return this;
-        }
 
         public SubtitleBuilder setLocale(String locale) {
             this.locale = locale;
@@ -171,7 +171,7 @@ public class Response {
         }
 
         public Subtitle build() {
-            return new Subtitle(index, locale, source);
+            return new Subtitle(locale, source);
         }
     }
 }

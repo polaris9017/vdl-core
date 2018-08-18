@@ -24,7 +24,6 @@ import kr.projectn.vdl.core.RequestBuilder;
 import kr.projectn.vdl.core.Response;
 import kr.projectn.vdl.core.frame.ResponseStatus;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
-import kr.projectn.vdl.core.frame.SubmoduleMessageEvent;
 import kr.projectn.vdl.core.util.Regex;
 import kr.projectn.vdl.core.util.WebClient;
 import org.apache.http.NameValuePair;
@@ -54,18 +53,18 @@ public class vlive_ch extends SubmoduleFrame {
         Regex regex = new Regex();
         WebClient client = new WebClient();
 
-        bus.post(new SubmoduleMessageEvent(moduleStr, Thread.currentThread().getStackTrace()[1].getMethodName()));
+        bus.post(this);
 
         if (regex.setRegexString("https?:\\/\\/channels\\.vlive\\.tv\\/([\\w\\D]+)\\/video")
                 .setExpressionString(url)
                 .group()) {
-            channelCode = regex.getMatchGroup().get(1);
+            channelCode = regex.get(1);
         }
 
         if (regex.setRegexString("<script[^>]+src=[\\\\\"\\'](http.+?\\/app\\.js)")
                 .setExpressionString(initPage)
                 .group()) {
-            appJsUrl = regex.getMatchGroup().get(1);
+            appJsUrl = regex.get(1);
         }
 
         if (regex.setRegexString("a\\.VFAN_APP_ID=\"(.+)\",a\\.POSTABLE_COUNTRIES")
@@ -73,14 +72,14 @@ public class vlive_ch extends SubmoduleFrame {
                         .request()
                         .getAsString())
                 .group()) {
-            appID = regex.getMatchGroup().get(1);
+            appID = regex.get(1);
         }
     }
 
 
     public void retrieveMediaSpec() {
 
-        bus.post(new SubmoduleMessageEvent(moduleStr, Thread.currentThread().getStackTrace()[1].getMethodName()));
+        bus.post(this);
 
         this.FetchVideoList();
 
@@ -103,8 +102,8 @@ public class vlive_ch extends SubmoduleFrame {
             response.setSize(resp.getSizeList().peek());
             response.setResolution(resp.getResolutionList().peek());
 
-            for (Response.Subtitle sub : resp.getSubtitleList()) {
-                response.setSubtitle(i - start, sub.getLocale(), sub.getSource());
+            for (Response.Subtitle sub : resp.getSubtitleList(url)) {
+                response.setSubtitle(url, sub.getLocale(), sub.getSource());
             }
         }
 
@@ -113,7 +112,7 @@ public class vlive_ch extends SubmoduleFrame {
 
 
     public Response getFinalMediaSpec() {
-        bus.post(new SubmoduleMessageEvent(moduleStr, Thread.currentThread().getStackTrace()[1].getMethodName()));
+        bus.post(this);
 
         response.setSvctype(moduleStr);
         return response;

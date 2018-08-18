@@ -42,7 +42,7 @@ public class kakao extends tvpot {
         if (regex.setRegexString("tv\\.kakao\\.com.+cliplink\\/(.*)")
                 .setExpressionString(url)
                 .group()) {
-            clipid = regex.getMatchGroup().get(1);
+            clipid = regex.get(1);
         }
 
         client.setClientConnection("http://tv.kakao.com/api/v1/ft/cliplinks/" + clipid)

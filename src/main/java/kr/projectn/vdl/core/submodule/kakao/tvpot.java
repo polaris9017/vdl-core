@@ -57,7 +57,7 @@ public class tvpot extends SubmoduleFrame {
         if (regex.setRegexString("tvpot\\.daum\\.net.+v\\/(.+)")
                 .setExpressionString(url)
                 .group()) {
-            vid = regex.getMatchGroup().get(1);
+            vid = regex.get(1);
         }
     }
 

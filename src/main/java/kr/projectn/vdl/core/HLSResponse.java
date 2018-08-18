@@ -91,7 +91,7 @@ public class HLSResponse extends Response {
         liveJsonStr = client.request().getAsString();
         if (regex.setRegexString("\"liveStreamInfo\"\\s*:\\s*\"(.*)\",")
                 .setExpressionString(liveJsonStr).group()) {
-            liveParam = new JsonParser().parse(regex.getMatchGroup().get(1)
+            liveParam = new JsonParser().parse(regex.get(1)
                     .replace("\\\"", "\"")).getAsJsonObject()
                     .get("resolutions").getAsJsonArray();
 
@@ -114,7 +114,7 @@ public class HLSResponse extends Response {
             for (ExtInf stream : mediaPlaylist.getSegments()) {
                 if (regex.setRegexString("\\w*+:\\/\\/vlive(?:[^\\/:]*+\\/)*+")
                         .setExpressionString(playlistUrl).group()) {
-                    videoUrlQueue.offer(regex.getMatchGroup().get(0) + stream.getTitle());
+                    videoUrlQueue.offer(regex.get(0) + stream.getTitle());
                 }
             }
             return true;

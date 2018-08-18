@@ -27,7 +27,6 @@ import kr.projectn.vdl.core.Response;
 import kr.projectn.vdl.core.frame.ResponseStatus;
 import kr.projectn.vdl.core.frame.ServiceType;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
-import kr.projectn.vdl.core.frame.SubmoduleMessageEvent;
 import kr.projectn.vdl.core.util.Regex;
 
 import java.util.HashMap;
@@ -50,7 +49,7 @@ class vlive_Realtime extends SubmoduleFrame {
     protected void parsePage() {
         Regex regex = new Regex();
 
-        bus.post(new SubmoduleMessageEvent(moduleStr, Thread.currentThread().getStackTrace()[1].getMethodName()));
+        bus.post(this);
 
         if (regex.setRegexString("\\bvlive\\.video\\.init\\(([^)]+)")
                 .setExpressionString(initPage)
@@ -62,12 +61,12 @@ class vlive_Realtime extends SubmoduleFrame {
 
         if (regex.setRegexString(ServiceType.VLIVE.getSvcUrl() + "\\/([\\d]+)")
                 .setExpressionString(url).group()) {
-            vid = regex.getMatchGroup().get(1);
+            vid = regex.get(1);
         }
 
         if (regex.setRegexString("\"og[^=]*+=\"(\\[[^\"]*+)\"")
                 .setExpressionString(initPage).group()) {
-            hlsResponse.setTitle(regex.getMatchGroup().get(1));
+            hlsResponse.setTitle(regex.get(1));
         }
 
         hlsResponse.setStatus(ResponseStatus.NOERR);
@@ -83,7 +82,7 @@ class vlive_Realtime extends SubmoduleFrame {
 
 
     protected Response getFinalMediaSpec() {
-        bus.post(new SubmoduleMessageEvent(moduleStr, Thread.currentThread().getStackTrace()[1].getMethodName()));
+        bus.post(this);
 
         hlsResponse.setHeader(header)
                 .setVid(vid)

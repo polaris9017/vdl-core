@@ -23,8 +23,8 @@ import kr.projectn.vdl.core.Request;
 import kr.projectn.vdl.core.RequestBuilder;
 import kr.projectn.vdl.core.Response;
 import kr.projectn.vdl.core.frame.ResponseStatus;
+import kr.projectn.vdl.core.frame.StatusCode;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
-import kr.projectn.vdl.core.frame.SubmoduleMessageEvent;
 import kr.projectn.vdl.core.util.Regex;
 import kr.projectn.vdl.core.util.WebClient;
 import org.apache.http.NameValuePair;
@@ -49,16 +49,17 @@ public class vlive_vod extends SubmoduleFrame {
     protected void parsePage() {
         regex = new Regex();
 
-        bus.post(new SubmoduleMessageEvent(moduleStr, Thread.currentThread().getStackTrace()[1].getMethodName()));
+        setStatus(StatusCode.E_PARSE.getCode());
+        bus.post(this);
 
         if (regex.setRegexString("\\bvlive\\.video\\.init\\(([^)]+)\\)")
                 .setSplitString("[\\s\\W]*,[\\s\\W]*")
                 .setExpressionString(initPage)
                 .split()
         ) {
-            status = regex.getSplitGroup().get(2).replace("\"", "");
-            vid_long = regex.getSplitGroup().get(5).replace("\"", "");
-            key = regex.getSplitGroup().get(6).replace("\"", "");
+            status = regex.get(2).replace("\"", "");
+            vid_long = regex.get(5).replace("\"", "");
+            key = regex.get(6).replace("\"", "");
         }
 
         switch (status) {
@@ -93,7 +94,8 @@ public class vlive_vod extends SubmoduleFrame {
         Stack<String> cdnUrl = new Stack<>();
         Stack<Long> fSize = new Stack<>();
 
-        bus.post(new SubmoduleMessageEvent(moduleStr, Thread.currentThread().getStackTrace()[1].getMethodName()));
+        setStatus(StatusCode.E_LOAD.getCode());
+        bus.post(this);
 
         reqParam.add(new BasicNameValuePair("videoId", vid_long));
         reqParam.add(new BasicNameValuePair("key", key));
@@ -138,10 +140,10 @@ public class vlive_vod extends SubmoduleFrame {
             for (JsonElement it : subtitleList) {
                 JsonObject obj = it.getAsJsonObject();
 
-                response.setSubtitle(0, obj.get("locale").getAsString(), obj.get("source").getAsString());
+                response.setSubtitle(obj.get("locale").getAsString(), obj.get("source").getAsString());
             }
         } else {
-            response.setSubtitle(0, "", "");
+            response.setSubtitle("", "");
         }
 
 
@@ -152,7 +154,8 @@ public class vlive_vod extends SubmoduleFrame {
 
 
     protected Response getFinalMediaSpec() {
-        bus.post(new SubmoduleMessageEvent(moduleStr, Thread.currentThread().getStackTrace()[1].getMethodName()));
+        setStatus(StatusCode.E_STORE.getCode());
+        bus.post(this);
 
         response.setStatus(ResponseStatus.NOERR);
         response.setSvctype(moduleStr);

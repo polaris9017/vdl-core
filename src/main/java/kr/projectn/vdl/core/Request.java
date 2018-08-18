@@ -46,6 +46,7 @@ public class Request {
     public boolean isURLListEmpty() {
         return urlList.isEmpty();
     }
+
     public String getUrl() {
         return urlList.poll();
     }

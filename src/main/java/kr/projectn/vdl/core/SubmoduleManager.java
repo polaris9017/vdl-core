@@ -67,18 +67,16 @@ public class SubmoduleManager {
         }
     }
 
-    public boolean run() {
+    public void run() {
 
         if (requestedSubModule.isEmpty()) {
             System.err.println("Request does not queued!");
-            return false;
         }
 
         for (SubmoduleFrame sub : requestedSubModule) {
             responseFinalMediaSpecList.offer(sub.run());
         }
 
-        return true;
     }
 
     public Queue<Response> getResponseList() {

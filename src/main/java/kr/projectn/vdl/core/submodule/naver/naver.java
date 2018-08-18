@@ -23,7 +23,6 @@ import kr.projectn.vdl.core.Request;
 import kr.projectn.vdl.core.Response;
 import kr.projectn.vdl.core.frame.ResponseStatus;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
-import kr.projectn.vdl.core.frame.SubmoduleMessageEvent;
 import kr.projectn.vdl.core.util.Regex;
 import kr.projectn.vdl.core.util.WebClient;
 import org.apache.http.NameValuePair;
@@ -50,14 +49,14 @@ public class naver extends SubmoduleFrame {
     protected void parsePage() {
         regex = new Regex();
 
-        bus.post(new SubmoduleMessageEvent(moduleStr, Thread.currentThread().getStackTrace()[1].getMethodName()));
+        bus.post(this);
 
         if (regex.setRegexString("var rmcPlayer = new nhn\\.rmcnmv\\.RMCVideoPlayer\\(\\\"(.+?)\\\", \\\"(.+?)\\\"")
                 .setExpressionString(initPage)
                 .split()
         ) {
-            mid = regex.getMatchGroup().get(1);
-            key = regex.getMatchGroup().get(2);
+            mid = regex.get(1);
+            key = regex.get(2);
         }
     }
 
@@ -70,7 +69,7 @@ public class naver extends SubmoduleFrame {
         Stack<String> cdnUrl = new Stack<>();
         Stack<Long> fSize = new Stack<>();
 
-        bus.post(new SubmoduleMessageEvent(moduleStr, Thread.currentThread().getStackTrace()[1].getMethodName()));
+        bus.post(this);
 
         reqParam.add(new BasicNameValuePair("key", key));
 
@@ -88,7 +87,7 @@ public class naver extends SubmoduleFrame {
             if (regex.setRegexString("og\\:title.+(\\[[^\"]*+)")
                     .setExpressionString(initPage)
                     .group()) {
-                response.setTitle(regex.getMatchGroup().get(1));
+                response.setTitle(regex.get(1));
             }
         }
 
@@ -112,7 +111,7 @@ public class naver extends SubmoduleFrame {
 
 
     protected Response getFinalMediaSpec() {
-        bus.post(new SubmoduleMessageEvent(moduleStr, Thread.currentThread().getStackTrace()[1].getMethodName()));
+        bus.post(this);
 
         response.setStatus(ResponseStatus.NOERR);
         response.setSvctype(moduleStr);

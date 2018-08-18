@@ -81,7 +81,7 @@ public class instagram extends SubmoduleFrame {
         if (regex.setRegexString("window\\._sharedData = (\\{.+\\})")
                 .setExpressionString(initPage)
                 .group()) {
-            mediaJsonStr = regex.getMatchGroup().get(1);
+            mediaJsonStr = regex.get(1);
         }
     }
 
