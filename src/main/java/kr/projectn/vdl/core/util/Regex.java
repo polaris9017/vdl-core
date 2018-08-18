@@ -29,6 +29,11 @@ public class Regex {
     private LinkedList<String> splitGroup;
     private LinkedList<String> matchGroup;
 
+    public Regex() {
+        splitGroup = new LinkedList<>();
+        matchGroup = new LinkedList<>();
+    }
+
     public Regex setExpressionString(String exprStr) {
         this.exprStr = Optional.ofNullable(exprStr).orElse("");
         return this;
@@ -89,5 +94,12 @@ public class Regex {
 
     public LinkedList<String> getMatchGroup() {
         return matchGroup;
+    }
+
+    public String get(int index) {
+        if (splitGroup.isEmpty()) {
+            return matchGroup.get(index);
+        }
+        return splitGroup.get(index);
     }
 }
