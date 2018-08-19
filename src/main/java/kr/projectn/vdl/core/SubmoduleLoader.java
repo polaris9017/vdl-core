@@ -21,18 +21,18 @@ import kr.projectn.vdl.core.frame.SubmoduleFrame;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class SubmoduleManager {
+public class SubmoduleLoader {
 
     private Request req;
     private Queue<SubmoduleFrame> requestedSubModule;
     private Queue<Response> responseFinalMediaSpecList;
 
-    private SubmoduleManager() {
+    private SubmoduleLoader() {
         requestedSubModule = new LinkedList<>();
         responseFinalMediaSpecList = new LinkedList<>();
     }
 
-    public SubmoduleManager(Request request) {
+    public SubmoduleLoader(Request request) {
         this();
         this.req = request;
         this.loadModule();

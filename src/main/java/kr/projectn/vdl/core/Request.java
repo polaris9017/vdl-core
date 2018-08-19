@@ -50,6 +50,7 @@ public class Request {
     public String getUrl() {
         return urlList.poll();
     }
+
     public SubmoduleCode getSubmoduleCode() {
         return submoduleCodeList.poll();
     }
