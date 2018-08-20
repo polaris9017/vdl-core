@@ -18,7 +18,7 @@ package kr.projectn.vdl.core.event;
 import com.google.common.eventbus.Subscribe;
 
 public abstract class SubmoduleEventListener {
-    private String subcode;
+    protected String subcode;
 
     /**
      * Method for receiving events from Eventbus
