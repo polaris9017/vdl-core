@@ -4,8 +4,6 @@ import com.google.common.eventbus.Subscribe;
 import kr.projectn.vdl.core.SubmoduleLoader;
 
 public interface SubmoduleEventListener {
-    SubmoduleLoader loader = null;
-
     /**
      * Method for receiving events from Eventbus
      *
@@ -40,8 +38,20 @@ public interface SubmoduleEventListener {
      */
     void onRetrievedMediaSpec();
 
-    /***
+    /**
      * handle getFinalMediaSpec() method
      */
     void onStoredMediaSpec();
+
+    /*
+     * Setter
+     */
+
+
+    /**
+     * Set SubmoduleLoader
+     *
+     * @param loader module-queued SubmoduleLoader
+     */
+    void setLoader(SubmoduleLoader loader);
 }
