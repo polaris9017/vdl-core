@@ -65,7 +65,7 @@ public class RequestBuilder {
         if (listener == null) {
             throw new NullEventListenerException();
         } else {
-            return new Request(urlList, submoduleCodeList);
+            return new Request(urlList, submoduleCodeList, listener);
         }
     }
 
@@ -82,7 +82,7 @@ public class RequestBuilder {
         if (listener == null) {
             throw new NullEventListenerException();
         } else {
-            return new Request(urlList, submoduleCodeList, start, end);
+            return new Request(urlList, submoduleCodeList, listener, start, end);
         }
     }
 

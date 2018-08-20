@@ -19,6 +19,7 @@ import java.util.Arrays;
 
 public enum ServiceType {
     VLIVE("vlive_vod", "vlive.tv/video"),
+    VLIVE_REALTIME("vlive_realtime", " "),
     VLIVE_CHANNEL("vlive_ch", "channels.vlive.tv"),
     NAVER("naver", "tv.naver.com"),
     DAUM("tvpot", "tvpot.daum.net"),
@@ -31,8 +32,8 @@ public enum ServiceType {
     private String subCode;
     private String svcUrl;
 
-    ServiceType(String subCode, String svcUrl) {
-        this.subCode = subCode;
+    ServiceType(String subName, String svcUrl) {
+        this.subCode = subName;
         this.svcUrl = svcUrl;
     }
 

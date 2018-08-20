@@ -46,17 +46,14 @@ public class Request {
     }
 
     public Request(Queue<String> urlList, Queue<SubmoduleCode> submoduleCodeList, SubmoduleEventListener listener) {
-        this.urlList = urlList;
-        this.submoduleCodeList = submoduleCodeList;
+        this(urlList, submoduleCodeList);
         this.listener = listener;
     }
 
     public Request(Queue<String> urlList, Queue<SubmoduleCode> submoduleCodeList, SubmoduleEventListener listener,
                    int start, int end) {
-        this.urlList = urlList;
-        this.submoduleCodeList = submoduleCodeList;
-        this.start = start;
-        this.end = end;
+        this(urlList, submoduleCodeList, start, end);
+
         this.listener = listener;
     }
 

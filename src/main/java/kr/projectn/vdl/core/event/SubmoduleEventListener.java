@@ -1,7 +1,7 @@
 package kr.projectn.vdl.core.event;
 
+import com.google.common.base.Splitter;
 import com.google.common.eventbus.Subscribe;
-import kr.projectn.vdl.core.SubmoduleLoader;
 
 public interface SubmoduleEventListener {
     /**
@@ -9,10 +9,31 @@ public interface SubmoduleEventListener {
      *
      * @param status status code<br>
      *               Structure: (subcode)-(mcode) [subcode: submodule code / mcode: current method]<br>
-     *               ex) 4-parse: 'naver' submodule, current method: parsePage()
+     *               ex) naver-parse: 'naver' submodule, running method: parsePage()
      */
     @Subscribe
-    void receive(String status);
+    default void receive(String status) {
+        switch (Splitter.on('-')
+                .trimResults()
+                .omitEmptyStrings()
+                .splitToList(status).get(1)) {
+            case "init":
+                onInitPageLoaded();
+                break;
+            case "parse":
+                onPageParsed();
+                break;
+            case "fetch":
+                onFetchedVideoList();
+                break;
+            case "retrieve":
+                onRetrievedMediaSpec();
+                break;
+            case "store":
+                onStoredMediaSpec();
+                break;
+        }
+    }
 
     /*
      * methods handling events received from submodules
@@ -43,15 +64,4 @@ public interface SubmoduleEventListener {
      */
     void onStoredMediaSpec();
 
-    /*
-     * Setter
-     */
-
-
-    /**
-     * Set SubmoduleLoader
-     *
-     * @param loader module-queued SubmoduleLoader
-     */
-    void setLoader(SubmoduleLoader loader);
 }
