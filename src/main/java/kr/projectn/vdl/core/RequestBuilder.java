@@ -15,8 +15,9 @@
  */
 package kr.projectn.vdl.core;
 
+import com.google.common.base.Objects;
+import kr.projectn.vdl.core.event.DefaultSubmoduleEventListener;
 import kr.projectn.vdl.core.event.SubmoduleEventListener;
-import kr.projectn.vdl.core.exception.NullEventListenerException;
 import kr.projectn.vdl.core.frame.ServiceType;
 import kr.projectn.vdl.core.frame.SubmoduleCode;
 
@@ -59,14 +60,13 @@ public class RequestBuilder {
      *
      * @return the request
      */
-    public Request build() throws NullEventListenerException {
+    public Request build() {
         this.setSubmoduleCode();
 
-        if (listener == null) {
-            throw new NullEventListenerException();
-        } else {
-            return new Request(urlList, submoduleCodeList, listener);
-        }
+        if (Objects.equal(listener, null))
+            listener = new DefaultSubmoduleEventListener();
+
+        return new Request(urlList, submoduleCodeList, listener);
     }
 
     /**
@@ -76,14 +76,10 @@ public class RequestBuilder {
      * @param end   the end
      * @return the request
      */
-    public Request build(int start, int end) throws NullEventListenerException {
+    public Request build(int start, int end) {
         this.setSubmoduleCode();
 
-        if (listener == null) {
-            throw new NullEventListenerException();
-        } else {
-            return new Request(urlList, submoduleCodeList, listener, start, end);
-        }
+        return new Request(urlList, submoduleCodeList, listener, start, end);
     }
 
     private void setSubmoduleCode() {
