@@ -15,6 +15,7 @@
  */
 package kr.projectn.vdl.core;
 
+import kr.projectn.vdl.core.event.SubmoduleEventListener;
 import kr.projectn.vdl.core.frame.SubmoduleCode;
 
 import java.util.LinkedList;
@@ -25,6 +26,7 @@ public class Request {
     private Queue<SubmoduleCode> submoduleCodeList;
     private int start;  //start point at vlive_ch
     private int end;  //end point at vlive_ch
+    private SubmoduleEventListener listener; //event listener
 
     private Request() {
         urlList = new LinkedList<>();
@@ -41,6 +43,21 @@ public class Request {
         this(urlList, submoduleCodeList);
         this.start = start;
         this.end = end;
+    }
+
+    public Request(Queue<String> urlList, Queue<SubmoduleCode> submoduleCodeList, SubmoduleEventListener listener) {
+        this.urlList = urlList;
+        this.submoduleCodeList = submoduleCodeList;
+        this.listener = listener;
+    }
+
+    public Request(Queue<String> urlList, Queue<SubmoduleCode> submoduleCodeList, SubmoduleEventListener listener,
+                   int start, int end) {
+        this.urlList = urlList;
+        this.submoduleCodeList = submoduleCodeList;
+        this.start = start;
+        this.end = end;
+        this.listener = listener;
     }
 
     public boolean isURLListEmpty() {
@@ -61,5 +78,9 @@ public class Request {
 
     public int getEnd() {
         return end;
+    }
+
+    public SubmoduleEventListener getListener() {
+        return listener;
     }
 }

@@ -56,7 +56,8 @@ public class SubmoduleLoader {
                      * Class.getDeclaredConstructor().newInstance() instead.
                      */
                     Object subInstance = sub.getDeclaredConstructor(Request.class)
-                            .newInstance(new RequestBuilder().setUrl(req.getUrl()).build(req.getStart(), req.getEnd()));
+                            .newInstance(new RequestBuilder().setUrl(req.getUrl())
+                                    .setListener(req.getListener()).build(req.getStart(), req.getEnd()));
                     requestedSubModule.offer((SubmoduleFrame) subInstance);
                 } else {
                     req.getUrl();  //remove url from list

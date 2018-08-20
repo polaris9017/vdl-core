@@ -18,6 +18,7 @@ package kr.projectn.vdl.core.frame;
 import com.google.common.eventbus.EventBus;
 import kr.projectn.vdl.core.Request;
 import kr.projectn.vdl.core.Response;
+import kr.projectn.vdl.core.event.SubmoduleEventListener;
 import kr.projectn.vdl.core.util.WebClient;
 
 /**
@@ -45,7 +46,7 @@ public abstract class SubmoduleFrame {
      */
     protected EventBus bus;
 
-    protected int status;
+    private SubmoduleEventListener listener;
 
     private SubmoduleFrame(SubmoduleCode subCode) {
         moduleStr = subCode.getSvcType();
@@ -61,9 +62,8 @@ public abstract class SubmoduleFrame {
         this.url = req.getUrl();
         response = new Response();
         bus = new EventBus();
-        //bus.register(new SubmoduleMessageListener());
-
-        status = StatusCode.STAT_EVENT.getCode();
+        listener = req.getListener();
+        bus.register(listener);
     }
 
     /**
@@ -87,7 +87,6 @@ public abstract class SubmoduleFrame {
      * Request init page.
      */
     protected void requestInitPage() {
-        setStatus(StatusCode.E_INIT.getCode());
         WebClient client = new WebClient();
 
         initPage = client.setClientConnection(this.url)
@@ -114,11 +113,4 @@ public abstract class SubmoduleFrame {
      */
     protected abstract Response getFinalMediaSpec();
 
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status |= status;
-    }
 }

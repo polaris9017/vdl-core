@@ -23,7 +23,6 @@ import kr.projectn.vdl.core.Request;
 import kr.projectn.vdl.core.RequestBuilder;
 import kr.projectn.vdl.core.Response;
 import kr.projectn.vdl.core.frame.ResponseStatus;
-import kr.projectn.vdl.core.frame.StatusCode;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
 import kr.projectn.vdl.core.util.Regex;
 import kr.projectn.vdl.core.util.WebClient;
@@ -49,7 +48,7 @@ public class vlive_vod extends SubmoduleFrame {
     protected void parsePage() {
         regex = new Regex();
 
-        setStatus(StatusCode.E_PARSE.getCode());
+
         bus.post(this);
 
         if (regex.setRegexString("\\bvlive\\.video\\.init\\(([^)]+)\\)")
@@ -94,7 +93,6 @@ public class vlive_vod extends SubmoduleFrame {
         Stack<String> cdnUrl = new Stack<>();
         Stack<Long> fSize = new Stack<>();
 
-        setStatus(StatusCode.E_LOAD.getCode());
         bus.post(this);
 
         reqParam.add(new BasicNameValuePair("videoId", vid_long));
@@ -154,7 +152,7 @@ public class vlive_vod extends SubmoduleFrame {
 
 
     protected Response getFinalMediaSpec() {
-        setStatus(StatusCode.E_STORE.getCode());
+
         bus.post(this);
 
         response.setStatus(ResponseStatus.NOERR);

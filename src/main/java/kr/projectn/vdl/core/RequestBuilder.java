@@ -15,6 +15,8 @@
  */
 package kr.projectn.vdl.core;
 
+import kr.projectn.vdl.core.event.SubmoduleEventListener;
+import kr.projectn.vdl.core.exception.NullEventListenerException;
 import kr.projectn.vdl.core.frame.ServiceType;
 import kr.projectn.vdl.core.frame.SubmoduleCode;
 
@@ -30,6 +32,7 @@ public class RequestBuilder {
     private Queue<SubmoduleCode> submoduleCodeList;
     private int start;  //start point at vlive_ch
     private int end;  //end point at vlive_ch
+    private SubmoduleEventListener listener; //event listener
 
     /**
      * Instantiates a new Request builder.
@@ -56,10 +59,14 @@ public class RequestBuilder {
      *
      * @return the request
      */
-    public Request build() {
+    public Request build() throws NullEventListenerException {
         this.setSubmoduleCode();
 
-        return new Request(urlList, submoduleCodeList);
+        if (listener == null) {
+            throw new NullEventListenerException();
+        } else {
+            return new Request(urlList, submoduleCodeList);
+        }
     }
 
     /**
@@ -69,10 +76,14 @@ public class RequestBuilder {
      * @param end   the end
      * @return the request
      */
-    public Request build(int start, int end) {
+    public Request build(int start, int end) throws NullEventListenerException {
         this.setSubmoduleCode();
 
-        return new Request(urlList, submoduleCodeList, start, end);
+        if (listener == null) {
+            throw new NullEventListenerException();
+        } else {
+            return new Request(urlList, submoduleCodeList, start, end);
+        }
     }
 
     private void setSubmoduleCode() {
@@ -81,5 +92,10 @@ public class RequestBuilder {
                     ServiceType.findServiceByURL(url)
             ));
         }
+    }
+
+    public RequestBuilder setListener(SubmoduleEventListener listener) {
+        this.listener = listener;
+        return this;
     }
 }
