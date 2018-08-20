@@ -49,7 +49,7 @@ public class naver extends SubmoduleFrame {
     protected void parsePage() {
         regex = new Regex();
 
-        bus.post(new SubmoduleEvent(moduleStr, "parse"));
+        super.parsePage();
 
         if (regex.setRegexString("var rmcPlayer = new nhn\\.rmcnmv\\.RMCVideoPlayer\\(\\\"(.+?)\\\", \\\"(.+?)\\\"")
                 .setExpressionString(initPage)
@@ -69,7 +69,7 @@ public class naver extends SubmoduleFrame {
         Stack<String> cdnUrl = new Stack<>();
         Stack<Long> fSize = new Stack<>();
 
-        bus.post(new SubmoduleEvent(moduleStr, "retrieve"));
+        super.retrieveMediaSpec();
 
         reqParam.add(new BasicNameValuePair("key", key));
 
@@ -111,7 +111,7 @@ public class naver extends SubmoduleFrame {
 
 
     protected void getFinalMediaSpec() {
-        bus.post(new SubmoduleEvent(moduleStr, "store"));
+        super.getFinalMediaSpec();
 
         response.setStatus(ResponseStatus.NOERR);
         response.setSvctype(moduleStr);
