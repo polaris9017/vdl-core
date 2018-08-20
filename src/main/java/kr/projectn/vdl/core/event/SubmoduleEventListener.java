@@ -1,29 +1,19 @@
 package kr.projectn.vdl.core.event;
 
-import com.google.common.base.Splitter;
 import com.google.common.eventbus.Subscribe;
 
-public class SubmoduleEventListener {
+public abstract class SubmoduleEventListener {
     private String subcode;
 
     /**
      * Method for receiving events from Eventbus
-     *
-     * @param status status code<br>
-     *               Structure: (subcode)-(mcode) [subcode: submodule code / mcode: current method]<br>
-     *               ex) naver-parse: 'naver' submodule, running method: parsePage()
+     * @param e Event instance
      */
     @Subscribe
-    public void receive(String status) {
-        subcode = Splitter.on('-')
-                .trimResults()
-                .omitEmptyStrings()
-                .splitToList(status).get(0);
+    public void receive(SubmoduleEvent e) {
+        subcode = e.getSubmodule();
 
-        switch (Splitter.on('-')
-                .trimResults()
-                .omitEmptyStrings()
-                .splitToList(status).get(1)) {
+        switch (e.getCurrentMethod()) {
             case "init":
                 onInitPageLoaded();
                 break;
@@ -39,6 +29,8 @@ public class SubmoduleEventListener {
             case "store":
                 onStoredMediaSpec();
                 break;
+            case "error":
+                onError(e);
         }
     }
 
@@ -49,35 +41,30 @@ public class SubmoduleEventListener {
     /**
      * handle requestInitPage() method
      */
-    public void onInitPageLoaded() {
-
-    }
+    public abstract void onInitPageLoaded();
 
     /**
      * handle parsePage() method
      */
-    public void onPageParsed() {
-
-    }
+    public abstract void onPageParsed();
 
     /**
      * handle FetchVideoList() method
      */
-    public void onFetchedVideoList() {
-
-    }
+    public abstract void onFetchedVideoList();
 
     /**
      * handle retrieveMediaSpec() method
      */
-    public void onRetrievedMediaSpec() {
-
-    }
+    public abstract void onRetrievedMediaSpec();
 
     /**
      * handle getFinalMediaSpec() method
      */
-    public void onStoredMediaSpec() {
+    public abstract void onStoredMediaSpec();
 
-    }
+    /**
+     * handle errors
+     */
+    public abstract void onError(SubmoduleEvent e);
 }
