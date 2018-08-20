@@ -30,6 +30,6 @@ public class DefaultSubmoduleEventListener extends SubmoduleEventListener {
 
     @Override
     public void onError(SubmoduleEvent e) {
-        System.err.println(e.getExceptionMessage());
+        System.err.println(e.getErrorMessage());
     }
 }

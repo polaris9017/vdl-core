@@ -21,6 +21,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import kr.projectn.vdl.core.Request;
 import kr.projectn.vdl.core.RequestBuilder;
+import kr.projectn.vdl.core.event.SubmoduleEvent;
 import kr.projectn.vdl.core.frame.ResponseStatus;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
 import kr.projectn.vdl.core.util.Regex;
@@ -80,6 +81,10 @@ public class vlive_vod extends SubmoduleFrame {
                 response.setStatus(ResponseStatus.PRODUCT_ONLY_APP);
         }
 
+        if (!response.isEmpty()) {
+            bus.post(new SubmoduleEvent(moduleStr, "error")
+                    .setErrorMessage(response.getStatus().getErrorMessage()));
+        }
     }
 
 
