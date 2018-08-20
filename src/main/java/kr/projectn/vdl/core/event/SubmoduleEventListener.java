@@ -3,7 +3,9 @@ package kr.projectn.vdl.core.event;
 import com.google.common.base.Splitter;
 import com.google.common.eventbus.Subscribe;
 
-public interface SubmoduleEventListener {
+public class SubmoduleEventListener {
+    private String subcode;
+
     /**
      * Method for receiving events from Eventbus
      *
@@ -12,7 +14,12 @@ public interface SubmoduleEventListener {
      *               ex) naver-parse: 'naver' submodule, running method: parsePage()
      */
     @Subscribe
-    default void receive(String status) {
+    public void receive(String status) {
+        subcode = Splitter.on('-')
+                .trimResults()
+                .omitEmptyStrings()
+                .splitToList(status).get(0);
+
         switch (Splitter.on('-')
                 .trimResults()
                 .omitEmptyStrings()
@@ -42,26 +49,35 @@ public interface SubmoduleEventListener {
     /**
      * handle requestInitPage() method
      */
-    void onInitPageLoaded();
+    public void onInitPageLoaded() {
+
+    }
 
     /**
      * handle parsePage() method
      */
-    void onPageParsed();
+    public void onPageParsed() {
+
+    }
 
     /**
      * handle FetchVideoList() method
      */
-    void onFetchedVideoList();
+    public void onFetchedVideoList() {
+
+    }
 
     /**
      * handle retrieveMediaSpec() method
      */
-    void onRetrievedMediaSpec();
+    public void onRetrievedMediaSpec() {
+
+    }
 
     /**
      * handle getFinalMediaSpec() method
      */
-    void onStoredMediaSpec();
+    public void onStoredMediaSpec() {
 
+    }
 }
