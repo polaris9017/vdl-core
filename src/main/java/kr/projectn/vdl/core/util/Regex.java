@@ -1,12 +1,12 @@
 /**
  * Copyright 2016-2018 qscx9512 <moonrise917@gmail.com>
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,9 +24,15 @@ public class Regex {
     private String exprStr;
     private String regexStr;
     private String splitStr;
+    private Optional<Matcher> mayMatcher;
     private Matcher match;
     private LinkedList<String> splitGroup;
     private LinkedList<String> matchGroup;
+
+    public Regex() {
+        splitGroup = new LinkedList<>();
+        matchGroup = new LinkedList<>();
+    }
 
     public Regex setExpressionString(String exprStr) {
         this.exprStr = Optional.ofNullable(exprStr).orElse("");
@@ -36,6 +42,8 @@ public class Regex {
     public Regex setRegexString(String regexStr) {
         matchGroup = new LinkedList<>();
         this.regexStr = Optional.ofNullable(regexStr).orElse("(.+)");
+
+        mayMatcher = Optional.ofNullable(match);
         return this;
     }
 
@@ -48,6 +56,11 @@ public class Regex {
     private boolean parse() {
 
         Pattern pattern = Pattern.compile(regexStr);
+
+        if (mayMatcher.isPresent()) {
+            match.reset();
+        }
+
         match = pattern.matcher(exprStr);
 
         return match.find();
@@ -68,8 +81,8 @@ public class Regex {
         if (!(this.parse()))
             return false;
 
-        while (match.find()) {
-            matchGroup.offer(match.group());
+        for (int i = 0; i <= match.groupCount(); i++) {
+            matchGroup.offer(match.group(i));
         }
 
         return true;
@@ -81,5 +94,12 @@ public class Regex {
 
     public LinkedList<String> getMatchGroup() {
         return matchGroup;
+    }
+
+    public String get(int index) {
+        if (splitGroup.isEmpty()) {
+            return matchGroup.get(index);
+        }
+        return splitGroup.get(index);
     }
 }

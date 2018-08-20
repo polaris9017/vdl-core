@@ -1,12 +1,15 @@
 plugins {
     id 'java'
     id "com.github.hierynomus.license" version "0.14.0"
+    id 'com.github.kt3k.coveralls' version '2.8.2'
 }
 
 group 'kr.projectn.vdl'
 version '1.0.0'
 
 sourceCompatibility = 1.8
+
+apply plugin: "jacoco"
 
 jar {
     manifest {
@@ -29,6 +32,17 @@ license {
     exclude "test/*"
 }
 
+jacoco {
+    toolVersion = "0.8.1"
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true // coveralls plugin depends on xml format report
+        html.enabled = true
+        html.destination file("${buildDir}/jacocoHtml")
+    }
+}
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -41,5 +55,7 @@ dependencies {
     implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.5.6' //Apache HttpClient Fluent API
     implementation group: 'commons-io', name: 'commons-io', version: '2.6' //Apache Commons IO
     implementation group: 'commons-validator', name: 'commons-validator', version: '1.6'
+    implementation group: 'com.google.guava', name: 'guava', version: '26.0-jre'
+    implementation group: 'org.kt3k.gradle.plugin', name: 'coveralls-gradle-plugin', version: '2.8.2'
 
 }

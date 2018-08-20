@@ -1,12 +1,12 @@
 /**
  * Copyright 2016-2018 qscx9512 <moonrise917@gmail.com>
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@ package kr.projectn.vdl.core.util;
 
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.fluent.Response;
@@ -78,6 +79,7 @@ public class WebClient {
                 break;
             case "post":
                 reqEntity = Request.Post(uri);
+                break;
         }
 
         reqEntity.addHeader("User-Agent", strUserAgent);
@@ -101,6 +103,16 @@ public class WebClient {
     public WebClient request(String reqMethod, Map<String, String> header) {
         customHeader = header;
         this.request(reqMethod);
+        return this;
+    }
+
+    public WebClient request() {
+        this.request("get");
+        return this;
+    }
+
+    public WebClient request(Map<String, String> header) {
+        this.request("get", header);
         return this;
     }
 
@@ -145,12 +157,23 @@ public class WebClient {
     }
 
     // Taken from http://www.codepreference.com/2017/02/using-apache-httpclient-fluent-api.html
+    // Solve Cookie warnings from https://stackoverflow.com/questions/7459279/httpclient-warning-cookie-rejected-illegal-domain-attribute/12324927
     private static CloseableHttpClient ignoreRequestSSLError() throws Exception {
         final SSLContext sslContext = new SSLContextBuilder()
                 .loadTrustMaterial(null, (x509CertChain, authType) -> true)
                 .build();
 
         return HttpClientBuilder.create()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        // Waiting for a connection from connection manager
+                        .setConnectionRequestTimeout(10000)
+                        // Waiting for connection to establish
+                        .setConnectTimeout(5000)
+                        .setExpectContinueEnabled(false)
+                        // Waiting for data
+                        .setSocketTimeout(5000)
+                        .setCookieSpec("easy")
+                        .build())
                 .setSSLContext(sslContext)
                 .setConnectionManager(
                         new PoolingHttpClientConnectionManager(
