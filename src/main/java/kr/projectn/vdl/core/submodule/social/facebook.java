@@ -19,7 +19,6 @@ package kr.projectn.vdl.core.submodule.social;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import kr.projectn.vdl.core.Request;
-import kr.projectn.vdl.core.Response;
 import kr.projectn.vdl.core.frame.ResponseStatus;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
 import kr.projectn.vdl.core.util.Regex;
@@ -94,8 +93,7 @@ public class facebook extends SubmoduleFrame {
     }
 
     @Override
-    protected Response getFinalMediaSpec() {
+    protected void getFinalMediaSpec() {
         response.setStatus(ResponseStatus.NOERR);
-        return response;
     }
 }

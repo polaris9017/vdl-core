@@ -20,7 +20,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import kr.projectn.vdl.core.Request;
-import kr.projectn.vdl.core.Response;
+import kr.projectn.vdl.core.event.SubmoduleEvent;
 import kr.projectn.vdl.core.frame.ResponseStatus;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
 import kr.projectn.vdl.core.util.Regex;
@@ -54,6 +54,8 @@ public class tvpot extends SubmoduleFrame {
     protected void parsePage() {
         Regex regex = new Regex();
 
+        bus.post(new SubmoduleEvent(moduleStr, "parse"));
+
         if (regex.setRegexString("tvpot\\.daum\\.net.+v\\/(.+)")
                 .setExpressionString(url)
                 .group()) {
@@ -71,6 +73,7 @@ public class tvpot extends SubmoduleFrame {
         Stack<String> cdnUrl = new Stack<>();
         Stack<Long> fSize = new Stack<>();
 
+        bus.post(new SubmoduleEvent(moduleStr, "retrieve"));
 
         param.add(new BasicNameValuePair("vid", vid));
         param.add(new BasicNameValuePair("dte_type", "WEB"));
@@ -124,10 +127,10 @@ public class tvpot extends SubmoduleFrame {
     }
 
     @Override
-    protected Response getFinalMediaSpec() {
+    protected void getFinalMediaSpec() {
+        bus.post(new SubmoduleEvent(moduleStr, "store"));
         response.setStatus(ResponseStatus.NOERR);
         response.setSvctype(moduleStr);
-        return response;
     }
 
     private class XmlHandler extends DefaultHandler {

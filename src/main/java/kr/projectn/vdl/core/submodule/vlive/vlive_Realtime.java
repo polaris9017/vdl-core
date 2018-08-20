@@ -23,7 +23,6 @@ package kr.projectn.vdl.core.submodule.vlive;
 
 import kr.projectn.vdl.core.HLSResponse;
 import kr.projectn.vdl.core.Request;
-import kr.projectn.vdl.core.Response;
 import kr.projectn.vdl.core.frame.ResponseStatus;
 import kr.projectn.vdl.core.frame.ServiceType;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
@@ -41,7 +40,7 @@ class vlive_Realtime extends SubmoduleFrame {
 
     public vlive_Realtime(Request req) {
         super(req);
-        moduleStr = "vlive_Realtime";  //Change submodule code to vlive live broadcasting(not included in ServiceType)
+        moduleStr = ServiceType.VLIVE_REALTIME.getCode();  //Change submodule code to vlive live broadcasting
         header.put("Content-Type", "application/x-www-form-urlencoded");
     }
 
@@ -49,7 +48,7 @@ class vlive_Realtime extends SubmoduleFrame {
     protected void parsePage() {
         Regex regex = new Regex();
 
-        bus.post(this);
+        super.parsePage();
 
         if (regex.setRegexString("\\bvlive\\.video\\.init\\(([^)]+)")
                 .setExpressionString(initPage)
@@ -81,14 +80,12 @@ class vlive_Realtime extends SubmoduleFrame {
     }
 
 
-    protected Response getFinalMediaSpec() {
-        bus.post(this);
+    protected void getFinalMediaSpec() {
+        super.getFinalMediaSpec();
 
         hlsResponse.setHeader(header)
                 .setVid(vid)
                 .setParameter(param);
         hlsResponse.setSvctype(moduleStr);
-
-        return hlsResponse;
     }
 }

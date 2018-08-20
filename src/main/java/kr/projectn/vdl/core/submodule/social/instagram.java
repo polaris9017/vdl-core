@@ -62,7 +62,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import kr.projectn.vdl.core.Request;
-import kr.projectn.vdl.core.Response;
+import kr.projectn.vdl.core.event.SubmoduleEvent;
 import kr.projectn.vdl.core.frame.ResponseStatus;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
 import kr.projectn.vdl.core.util.Regex;
@@ -78,6 +78,8 @@ public class instagram extends SubmoduleFrame {
     public void parsePage() {
         Regex regex = new Regex();
 
+        bus.post(new SubmoduleEvent(moduleStr, "parse"));
+
         if (regex.setRegexString("window\\._sharedData = (\\{.+\\})")
                 .setExpressionString(initPage)
                 .group()) {
@@ -90,6 +92,8 @@ public class instagram extends SubmoduleFrame {
         JsonObject jsonBody = new JsonParser().parse(mediaJsonStr).getAsJsonObject();
         JsonArray edgeNode;
         JsonObject shortcodeMedia;
+
+        bus.post(new SubmoduleEvent(moduleStr, "retrieve"));
 
         if (!jsonBody.has("entry_data")) {
             response.setStatus(ResponseStatus.INSTA_NO_POST);
@@ -136,10 +140,9 @@ public class instagram extends SubmoduleFrame {
         }
     }
 
-
-    public Response getFinalMediaSpec() {
+    protected void getFinalMediaSpec() {
+        bus.post(new SubmoduleEvent(moduleStr, "store"));
         response.setSvctype(moduleStr);
         response.setStatus(ResponseStatus.NOERR);
-        return response;
     }
 }

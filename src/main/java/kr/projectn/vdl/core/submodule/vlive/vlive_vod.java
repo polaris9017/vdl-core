@@ -21,7 +21,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import kr.projectn.vdl.core.Request;
 import kr.projectn.vdl.core.RequestBuilder;
-import kr.projectn.vdl.core.Response;
 import kr.projectn.vdl.core.frame.ResponseStatus;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
 import kr.projectn.vdl.core.util.Regex;
@@ -48,8 +47,7 @@ public class vlive_vod extends SubmoduleFrame {
     protected void parsePage() {
         regex = new Regex();
 
-
-        bus.post(this);
+        super.parsePage();
 
         if (regex.setRegexString("\\bvlive\\.video\\.init\\(([^)]+)\\)")
                 .setSplitString("[\\s\\W]*,[\\s\\W]*")
@@ -93,7 +91,7 @@ public class vlive_vod extends SubmoduleFrame {
         Stack<String> cdnUrl = new Stack<>();
         Stack<Long> fSize = new Stack<>();
 
-        bus.post(this);
+        super.retrieveMediaSpec();
 
         reqParam.add(new BasicNameValuePair("videoId", vid_long));
         reqParam.add(new BasicNameValuePair("key", key));
@@ -151,12 +149,11 @@ public class vlive_vod extends SubmoduleFrame {
     }
 
 
-    protected Response getFinalMediaSpec() {
+    protected void getFinalMediaSpec() {
 
-        bus.post(this);
+        super.getFinalMediaSpec();
 
         response.setStatus(ResponseStatus.NOERR);
         response.setSvctype(moduleStr);
-        return response;
     }
 }

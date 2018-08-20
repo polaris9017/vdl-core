@@ -20,7 +20,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import kr.projectn.vdl.core.Request;
-import kr.projectn.vdl.core.Response;
+import kr.projectn.vdl.core.event.SubmoduleEvent;
 import kr.projectn.vdl.core.frame.ResponseStatus;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
 import kr.projectn.vdl.core.util.Regex;
@@ -49,7 +49,7 @@ public class naver extends SubmoduleFrame {
     protected void parsePage() {
         regex = new Regex();
 
-        bus.post(this);
+        bus.post(new SubmoduleEvent(moduleStr, "parse"));
 
         if (regex.setRegexString("var rmcPlayer = new nhn\\.rmcnmv\\.RMCVideoPlayer\\(\\\"(.+?)\\\", \\\"(.+?)\\\"")
                 .setExpressionString(initPage)
@@ -69,7 +69,7 @@ public class naver extends SubmoduleFrame {
         Stack<String> cdnUrl = new Stack<>();
         Stack<Long> fSize = new Stack<>();
 
-        bus.post(this);
+        bus.post(new SubmoduleEvent(moduleStr, "retrieve"));
 
         reqParam.add(new BasicNameValuePair("key", key));
 
@@ -110,11 +110,10 @@ public class naver extends SubmoduleFrame {
     }
 
 
-    protected Response getFinalMediaSpec() {
-        bus.post(this);
+    protected void getFinalMediaSpec() {
+        bus.post(new SubmoduleEvent(moduleStr, "store"));
 
         response.setStatus(ResponseStatus.NOERR);
         response.setSvctype(moduleStr);
-        return response;
     }
 }

@@ -22,6 +22,7 @@ import com.google.gson.JsonParser;
 import kr.projectn.vdl.core.Request;
 import kr.projectn.vdl.core.RequestBuilder;
 import kr.projectn.vdl.core.Response;
+import kr.projectn.vdl.core.event.SubmoduleEvent;
 import kr.projectn.vdl.core.frame.ResponseStatus;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
 import kr.projectn.vdl.core.util.Regex;
@@ -53,7 +54,7 @@ public class vlive_ch extends SubmoduleFrame {
         Regex regex = new Regex();
         WebClient client = new WebClient();
 
-        bus.post(this);
+        super.parsePage();
 
         if (regex.setRegexString("https?:\\/\\/channels\\.vlive\\.tv\\/([\\w\\D]+)\\/video")
                 .setExpressionString(url)
@@ -79,7 +80,7 @@ public class vlive_ch extends SubmoduleFrame {
 
     public void retrieveMediaSpec() {
 
-        bus.post(this);
+        super.retrieveMediaSpec();
 
         this.FetchVideoList();
 
@@ -111,17 +112,18 @@ public class vlive_ch extends SubmoduleFrame {
     }
 
 
-    public Response getFinalMediaSpec() {
-        bus.post(this);
+    protected void getFinalMediaSpec() {
+        super.getFinalMediaSpec();
 
         response.setSvctype(moduleStr);
-        return response;
     }
 
     private void FetchVideoList() {
         int channelSeq;
         List<NameValuePair> param = new ArrayList<>();
         WebClient client = new WebClient();
+
+        bus.post(new SubmoduleEvent(moduleStr, "fetch"));
 
         param.add(new BasicNameValuePair("app_id", appID));
         param.add(new BasicNameValuePair("channelCode", channelCode));

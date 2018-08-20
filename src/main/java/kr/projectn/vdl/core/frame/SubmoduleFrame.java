@@ -18,6 +18,7 @@ package kr.projectn.vdl.core.frame;
 import com.google.common.eventbus.EventBus;
 import kr.projectn.vdl.core.Request;
 import kr.projectn.vdl.core.Response;
+import kr.projectn.vdl.core.event.SubmoduleEvent;
 import kr.projectn.vdl.core.event.SubmoduleEventListener;
 import kr.projectn.vdl.core.util.WebClient;
 
@@ -78,8 +79,9 @@ public abstract class SubmoduleFrame {
 
         if (response.isEmpty())
             this.retrieveMediaSpec();
+        this.getFinalMediaSpec();
 
-        return this.getFinalMediaSpec();
+        return response;
     }
 
 
@@ -89,28 +91,34 @@ public abstract class SubmoduleFrame {
     protected void requestInitPage() {
         WebClient client = new WebClient();
 
+        bus.post(new SubmoduleEvent(moduleStr, "init"));
+
         initPage = client.setClientConnection(this.url)
                 .request()
                 .getAsString();
-
-        bus.post(moduleStr + "-init");
     }
 
     /**
      * Parse page.
      */
-    protected abstract void parsePage();
+    protected void parsePage() {
+        bus.post(new SubmoduleEvent(moduleStr, "parse"));
+    }
 
     /**
      * Retrieve media spec.
      */
-    protected abstract void retrieveMediaSpec();
+    protected void retrieveMediaSpec() {
+        bus.post(new SubmoduleEvent(moduleStr, "retrieve"));
+    }
 
     /**
      * Gets final media spec.
      *
      * @return the final media spec
      */
-    protected abstract Response getFinalMediaSpec();
+    protected void getFinalMediaSpec() {
+        bus.post(new SubmoduleEvent(moduleStr, "store"));
+    }
 
 }
