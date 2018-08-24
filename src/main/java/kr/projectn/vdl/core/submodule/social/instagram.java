@@ -78,7 +78,7 @@ public class instagram extends SubmoduleFrame {
     public void parsePage() {
         Regex regex = new Regex();
 
-        bus.post(new SubmoduleEvent(moduleStr, "parse"));
+        super.parsePage();
 
         if (regex.setRegexString("window\\._sharedData = (\\{.+\\})")
                 .setExpressionString(initPage)
@@ -93,7 +93,7 @@ public class instagram extends SubmoduleFrame {
         JsonArray edgeNode;
         JsonObject shortcodeMedia;
 
-        bus.post(new SubmoduleEvent(moduleStr, "retrieve"));
+        super.retrieveMediaSpec();
 
         if (!jsonBody.has("entry_data")) {
             response.setStatus(ResponseStatus.INSTA_NO_POST);
@@ -141,7 +141,7 @@ public class instagram extends SubmoduleFrame {
     }
 
     protected void getFinalMediaSpec() {
-        bus.post(new SubmoduleEvent(moduleStr, "store"));
+        super.getFinalMediaSpec();
         response.setSvctype(moduleStr);
         response.setStatus(ResponseStatus.NOERR);
     }

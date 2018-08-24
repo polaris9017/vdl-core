@@ -54,7 +54,7 @@ public class tvpot extends SubmoduleFrame {
     protected void parsePage() {
         Regex regex = new Regex();
 
-        bus.post(new SubmoduleEvent(moduleStr, "parse"));
+        super.parsePage();
 
         if (regex.setRegexString("tvpot\\.daum\\.net.+v\\/(.+)")
                 .setExpressionString(url)
@@ -73,7 +73,7 @@ public class tvpot extends SubmoduleFrame {
         Stack<String> cdnUrl = new Stack<>();
         Stack<Long> fSize = new Stack<>();
 
-        bus.post(new SubmoduleEvent(moduleStr, "retrieve"));
+        super.retrieveMediaSpec();
 
         param.add(new BasicNameValuePair("vid", vid));
         param.add(new BasicNameValuePair("dte_type", "WEB"));
@@ -128,7 +128,7 @@ public class tvpot extends SubmoduleFrame {
 
     @Override
     protected void getFinalMediaSpec() {
-        bus.post(new SubmoduleEvent(moduleStr, "store"));
+        super.getFinalMediaSpec();
         response.setStatus(ResponseStatus.NOERR);
         response.setSvctype(moduleStr);
     }
