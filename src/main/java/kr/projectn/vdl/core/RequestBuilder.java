@@ -55,6 +55,9 @@ public class RequestBuilder {
     public Request build(int start, int end) {
         this.setSubmoduleCode();
 
+        if (Objects.equal(listener, null))
+            listener = new DefaultSubmoduleEventListener();
+
         return new Request(urlList, submoduleCodeList, listener, start, end);
     }
 
