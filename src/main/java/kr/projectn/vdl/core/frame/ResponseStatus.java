@@ -15,6 +15,11 @@
  */
 package kr.projectn.vdl.core.frame;
 
+/**
+ * Enumeration for {@link kr.projectn.vdl.core.Response} status value
+ *
+ * @since 1.0
+ */
 public enum ResponseStatus {
     NOERR(""),
     NULL_VAL(""),
@@ -31,6 +36,11 @@ public enum ResponseStatus {
         this.msg = msg;
     }
 
+    /**
+     * Returns error message from {@code ResponseStatus} value
+     *
+     * @return an error message
+     */
     public String getErrorMessage() {
         return msg;
     }

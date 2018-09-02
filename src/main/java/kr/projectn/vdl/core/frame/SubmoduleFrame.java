@@ -23,30 +23,25 @@ import kr.projectn.vdl.core.event.SubmoduleEventListener;
 import kr.projectn.vdl.core.util.WebClient;
 
 /**
- * The type Submodule frame.
+ * Abstract class for building submodules.
+ * <h2>How to use</h2>
+ * <ol>
+ *     <li>Inherit this class to build submodule frame</li>
+ *     <li>Implement all method except {@link #requestInitPage()} and {@link #getUrl()}.
+ *         In that case, you should call {@code super.{Current method}()} to post event through {@link EventBus}
+ *     </li>
+ *     <li>Execute {@link #run()} and get {@link Response} for result</li>
+ * </ol>
+ *
+ * @since 1.0
  */
 public abstract class SubmoduleFrame {
-    /**
-     * The Url.
-     */
-    protected String url;
-    /**
-     * The Init page.
-     */
-    protected String initPage;
-    /**
-     * The Response.
-     */
-    protected Response response;
-    /**
-     * The Module str.
-     */
-    protected String moduleStr;
-    /**
-     * The Bus.
-     */
-    protected EventBus bus;
 
+    protected String url;
+    protected String initPage;
+    protected Response response;
+    protected String moduleStr;
+    protected EventBus bus;
     private SubmoduleEventListener listener;
 
     private SubmoduleFrame(SubmoduleCode subCode) {
@@ -54,9 +49,9 @@ public abstract class SubmoduleFrame {
     }
 
     /**
-     * Instantiates a new Submodule frame.
-     *
-     * @param req the req
+     * Creates new submodule instance with single {@link Request} entity passed from
+     * {@link kr.projectn.vdl.core.SubmoduleLoader}
+     * @param req {@link Request} entity
      */
     public SubmoduleFrame(Request req) {
         this(req.getSubmoduleCode());
@@ -68,9 +63,10 @@ public abstract class SubmoduleFrame {
     }
 
     /**
-     * Run response.
-     *
-     * @return the response
+     * Run all methods and returns {@link Response} entity<br><br>
+     * In default, methods will be executed  {@link #requestInitPage()}, {@link #parsePage()},
+     * {@link #retrieveMediaSpec()}, {@link #getFinalMediaSpec()} in sequence.
+     * @return {@link Response} entity contains video metadata(media URL, resolution, etc.)
      */
     public Response run() {
 
@@ -84,14 +80,14 @@ public abstract class SubmoduleFrame {
         return response;
     }
 
-
     /**
-     * Request init page.
+     * Requests video view page body. <br><br>
+     * Store plain {@code String} of page body into {@code initPage} variable after request.
      */
     protected void requestInitPage() {
         WebClient client = new WebClient();
 
-        bus.post(new SubmoduleEvent(moduleStr, "init"));
+        bus.post(new SubmoduleEvent(this, "init"));
 
         initPage = client.setClientConnection(this.url)
                 .request()
@@ -99,26 +95,34 @@ public abstract class SubmoduleFrame {
     }
 
     /**
-     * Parse page.
+     * Parses page body to prepare for retrieving video metadata. <br><br>
+     * This will may vary to submodule
      */
     protected void parsePage() {
-        bus.post(new SubmoduleEvent(moduleStr, "parse"));
+        bus.post(new SubmoduleEvent(this, "parse"));
     }
 
     /**
-     * Retrieve media spec.
+     * Retrieves video metadata.<br><br>
+     * This will may vary to submodule
      */
     protected void retrieveMediaSpec() {
-        bus.post(new SubmoduleEvent(moduleStr, "retrieve"));
+        bus.post(new SubmoduleEvent(this, "retrieve"));
     }
 
     /**
-     * Gets final media spec.
-     *
-     * @return the final media spec
+     * Stores final video metadata and status
      */
     protected void getFinalMediaSpec() {
-        bus.post(new SubmoduleEvent(moduleStr, "store"));
+        bus.post(new SubmoduleEvent(this, "store"));
     }
 
+    /**
+     * Returns currently working URL
+     *
+     * @return current URL
+     */
+    public String getUrl() {
+        return url;
+    }
 }

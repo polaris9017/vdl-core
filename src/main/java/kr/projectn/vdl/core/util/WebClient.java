@@ -43,11 +43,9 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Http request utility class
- *
- * Created by qscx9512 on 2017-05-03.
+ * Web request util class wrapping Apache HttpClient library with Fluent API
+ * @since 1.0
  */
-
 public class WebClient {
     private Executor execEntity;
     private final String strUserAgent;
@@ -56,6 +54,9 @@ public class WebClient {
     private Map<String, String> customHeader;
     private Response responseEntity;
 
+    /**
+     * Create new {@code WebClient} and set required settings
+     */
     public WebClient() {
         strUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36";
         builder = new URIBuilder();
@@ -69,6 +70,14 @@ public class WebClient {
         customHeader = new HashMap<>();
     }
 
+    /**
+     * Requests web entity with HTTP.<br><br>
+     * Supported REST API for request is GET and POST and this can use with passing {@code reqMethod} to
+     * {@code get}, {@code post} as string respectively.
+     *
+     * @param reqMethod request REST API type
+     * @return {@link WebClient} entity contains response from web
+     */
     public WebClient request(String reqMethod) {
 
         Request reqEntity = null;
@@ -100,22 +109,48 @@ public class WebClient {
         return this;
     }
 
+    /**
+     * Requests web entity with HTTP.<br><br>
+     * Supported REST API for request is GET and POST and this can use with passing {@code reqMethod} to
+     * {@code get}, {@code post} as string respectively.<br>
+     * Additional header should be passed to {@code header} parameter.
+     * @param reqMethod request REST API type
+     * @param header additional header
+     * @return {@link WebClient} entity contains response from web
+     */
     public WebClient request(String reqMethod, Map<String, String> header) {
         customHeader = header;
         this.request(reqMethod);
         return this;
     }
 
+    /**
+     * Requests web entity with HTTP.<br><br>
+     * For {@link WebClient} {@code c}, the expressions {@code c.request("get")} and {@code c.request()} is equivalent.
+     * @return {@link WebClient} entity contains response from web
+     */
     public WebClient request() {
         this.request("get");
         return this;
     }
 
+    /**
+     * Requests web entity with HTTP.<br><br>
+     * For {@link WebClient} {@code c} and header map {@code h},
+     * the expressions {@code c.request("get", h)} and {@code c.request(h)} is equivalent.
+     * @param header additional header
+     * @return {@link WebClient} entity contains response from web
+     */
     public WebClient request(Map<String, String> header) {
         this.request("get", header);
         return this;
     }
 
+    /**
+     * Set destination URL for request
+     * @param url destination URL
+     * @return {@link WebClient} entity contains destination URL
+     */
     public WebClient setClientConnection(String url) {
         try {
             URL urlContainer = new URL(Optional.ofNullable(url).orElse(""));
@@ -141,6 +176,12 @@ public class WebClient {
         return this;
     }
 
+    /**
+     * Set URL parameter for request.<br><br>
+     * This parameter used both GET and POST request method.
+     * @param param URL parameter
+     * @return {@link WebClient} entity contains URL parameter
+     */
     public WebClient setConnectionParameter(List<NameValuePair> param) {
         try {
             builder = builder.setParameters(param);
@@ -151,6 +192,12 @@ public class WebClient {
         return this;
     }
 
+    /**
+     * Set user-custom header for request in advance.
+     * @param key header key
+     * @param value header value matched to key
+     * @return {@link WebClient} entity contains header
+     */
     public WebClient setHeader(String key, String value) {
         customHeader.put(key, value);
         return this;
@@ -186,6 +233,11 @@ public class WebClient {
                 .build();
     }
 
+    /**
+     * Returns response body to string.<br><br>
+     * This method is suitable for plain HTML body, not for binary response.
+     * @return response body string
+     */
     public String getAsString() {
         try {
             return responseEntity.returnContent().asString();
@@ -195,6 +247,11 @@ public class WebClient {
         return null;
     }
 
+    /**
+     * Writes response body into file with {@code title} as file name.<br><br>
+     * This method is suitable for both plain HTML body and binary responses.
+     * @param title file name you desire to write
+     */
     public void writeFile(String title) {
         try {
             responseEntity.saveContent(new File(title));

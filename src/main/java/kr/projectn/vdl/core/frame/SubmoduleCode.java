@@ -19,6 +19,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Enumeration for manage submodule(s) service type and base URL
+ *
+ * @since 1.0
+ */
 public enum SubmoduleCode {
     MODULE_VLIVE("vlive", Arrays.asList(ServiceType.VLIVE, ServiceType.VLIVE_CHANNEL)),
     MODULE_NAVER("naver", Arrays.asList(ServiceType.NAVER)),
@@ -36,6 +41,12 @@ public enum SubmoduleCode {
         this.svcList = svcList;
     }
 
+    /**
+     * Find and returns submodule name by {@link ServiceType} value
+     *
+     * @param svcType {@link ServiceType} value to find submodule
+     * @return submodule name
+     */
     public static SubmoduleCode findSubModuleByType(ServiceType svcType) {
         return Arrays.stream(SubmoduleCode.values())
                 .filter(sub -> sub.hasSubModule(svcType))
@@ -49,10 +60,18 @@ public enum SubmoduleCode {
                 .anyMatch(svc -> svc.equals(svcType));
     }
 
+    /**
+     * Returns submodule name
+     * @return submodule name
+     */
     public String getSubCode() {
         return subCode;
     }
 
+    /**
+     * Returns submodule service type as string
+     * @return submodule service type string
+     */
     public String getSvcType() {
         return svcType.getCode();
     }

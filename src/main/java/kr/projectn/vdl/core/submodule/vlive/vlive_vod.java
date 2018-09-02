@@ -82,7 +82,7 @@ public class vlive_vod extends SubmoduleFrame {
         }
 
         if (!response.isEmpty()) {
-            bus.post(new SubmoduleEvent(moduleStr, "error")
+            bus.post(new SubmoduleEvent(this, "error")
                     .setErrorMessage(response.getStatus().getErrorMessage()));
         }
     }
