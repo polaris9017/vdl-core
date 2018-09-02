@@ -123,7 +123,7 @@ public class vlive_ch extends SubmoduleFrame {
         List<NameValuePair> param = new ArrayList<>();
         WebClient client = new WebClient();
 
-        bus.post(new SubmoduleEvent(moduleStr, "fetch"));
+        bus.post(new SubmoduleEvent(this, "fetch"));
 
         param.add(new BasicNameValuePair("app_id", appID));
         param.add(new BasicNameValuePair("channelCode", channelCode));

@@ -24,9 +24,6 @@ import kr.projectn.vdl.core.frame.SubmoduleCode;
 import java.util.LinkedList;
 import java.util.Queue;
 
-/**
- * The type Request builder.
- */
 public class RequestBuilder {
 
     private Queue<String> urlList;
@@ -35,31 +32,17 @@ public class RequestBuilder {
     private int end;  //end point at vlive_ch
     private SubmoduleEventListener listener; //event listener
 
-    /**
-     * Instantiates a new Request builder.
-     */
     public RequestBuilder() {
         urlList = new LinkedList<>();
         submoduleCodeList = new LinkedList<>();
     }
 
-    /**
-     * Sets url.
-     *
-     * @param url the url
-     * @return the url
-     */
     public RequestBuilder setUrl(String url) {
         urlList.offer(url);
 
         return this;
     }
 
-    /**
-     * Build request.
-     *
-     * @return the request
-     */
     public Request build() {
         this.setSubmoduleCode();
 
@@ -69,13 +52,6 @@ public class RequestBuilder {
         return new Request(urlList, submoduleCodeList, listener);
     }
 
-    /**
-     * Build request.
-     *
-     * @param start the start
-     * @param end   the end
-     * @return the request
-     */
     public Request build(int start, int end) {
         this.setSubmoduleCode();
 

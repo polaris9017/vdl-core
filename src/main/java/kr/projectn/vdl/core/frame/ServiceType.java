@@ -17,6 +17,11 @@ package kr.projectn.vdl.core.frame;
 
 import java.util.Arrays;
 
+/**
+ * Enumeration for service type and base URL at {@link SubmoduleCode}
+ *
+ * @since 1.0
+ */
 public enum ServiceType {
     VLIVE("vlive_vod", "vlive.tv/video"),
     VLIVE_REALTIME("vlive_realtime", " "),
@@ -37,14 +42,28 @@ public enum ServiceType {
         this.svcUrl = svcUrl;
     }
 
+    /**
+     * Returns base URL for specific submodule
+     *
+     * @return base URL string
+     */
     public String getSvcUrl() {
         return svcUrl;
     }
 
+    /**
+     * Returns service type for specific submodule
+     * @return service type string
+     */
     public String getCode() {
         return subCode;
     }
 
+    /**
+     * Find and returns service type by URL
+     * @param url URL string to find type
+     * @return service type string
+     */
     public static ServiceType findServiceByURL(String url) {
         return Arrays.stream(ServiceType.values())
                 .filter(svc -> url.contains(svc.getSvcUrl()))
