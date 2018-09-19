@@ -29,6 +29,18 @@ import org.apache.http.message.BasicNameValuePair;
 
 import java.util.*;
 
+/**
+ * Returns response that content of final URL is HLS playlist.<br><br>
+ * (Currently used only at {@code vlive_Realtime} module)
+ *
+ *  <h2>How to use</h2>
+ *  <ol>
+ *      <li>Create a loop with conditions {@link #isLiveEnd} and run {@link #getHLSSegment()};</li>
+ *      <li>Get video segment URL with {@link #getVideoUrlQueue()}</li>
+ *  </ol>
+ *
+ *  @since 1.0
+ */
 public class HLSResponse extends Response {
     private int seq;
     private String playlistUrl;
@@ -39,6 +51,9 @@ public class HLSResponse extends Response {
     private Queue<String> videoUrlQueue;
     private boolean isLiveEnd;
 
+    /**
+     * Creates a new {@code HLSResponse}
+     */
     public HLSResponse() {
         super();
         header = new HashMap<>();
@@ -50,21 +65,41 @@ public class HLSResponse extends Response {
         isLiveEnd = false;
     }
 
+    /**
+     * Set header that used at request video segments
+     * @param header Request header
+     * @return this entity contains header
+     */
     public HLSResponse setHeader(Map<String, String> header) {
         this.header = header;
         return this;
     }
 
+    /**
+     * Set {@code videoSeq} parameter that used at request video segments
+     * @param vid videoSeq num. (as string)
+     * @return this entity contains videoSeq
+     */
     public HLSResponse setVid(String vid) {
         paramList.add(new BasicNameValuePair("videoSeq", vid));
         return this;
     }
 
+    /**
+     * Set header that used at request video segments
+     * @param param URL parameter
+     * @return this entity contains URL parameter
+     */
     public HLSResponse setParameter(LinkedList<String> param) {
         this.param = param;
         return this;
     }
 
+    /**
+     * Get video segment URL from HLS playlist requested from URL.
+     * @return {@code true} if successfully get video segment
+     */
+    //TODO: Change the way to get segment to handle at ffmpeg from current way.
     public boolean getHLSSegment() {
 
         int seq_prev = seq; //previous sequence
@@ -121,10 +156,18 @@ public class HLSResponse extends Response {
         }
     }
 
+    /**
+     * Returns if live broadcasting is end
+     * @return {@code true} if live broadcasting has been ended.
+     */
     public boolean isLiveEnd() {
         return isLiveEnd;
     }
 
+    /**
+     * Returns video segment URL list.
+     * @return video segment URL list as queue.
+     */
     public Queue<String> getVideoUrlQueue() {
         return videoUrlQueue;
     }

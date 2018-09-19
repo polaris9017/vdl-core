@@ -24,6 +24,11 @@ import kr.projectn.vdl.core.frame.SubmoduleCode;
 import java.util.LinkedList;
 import java.util.Queue;
 
+/**
+ * Builds {@link Response} instance
+ *
+ * @since 1.0
+ */
 public class RequestBuilder {
 
     private Queue<String> urlList;
@@ -32,17 +37,29 @@ public class RequestBuilder {
     private int end;  //end point at vlive_ch
     private SubmoduleEventListener listener; //event listener
 
+    /**
+     * Creates a new {@code RequestBuilder} instance
+     */
     public RequestBuilder() {
         urlList = new LinkedList<>();
         submoduleCodeList = new LinkedList<>();
     }
 
+    /**
+     * Add URL to internal list
+     * @param url URL string
+     * @return {@code RequestBuilder} entity contains URL
+     */
     public RequestBuilder setUrl(String url) {
         urlList.offer(url);
 
         return this;
     }
 
+    /**
+     * Build a new {@link Request} instance using URL and submodule identification code
+     * @return new {@link Request} instance
+     */
     public Request build() {
         this.setSubmoduleCode();
 
@@ -52,6 +69,12 @@ public class RequestBuilder {
         return new Request(urlList, submoduleCodeList, listener);
     }
 
+    /**
+     * Build a new {@link Request} instance using URL and submodule identification code with start, end index of list
+     * @param start start index
+     * @param end end index (must be less to length of list)
+     * @return new {@link Request} instance with list index
+     */
     public Request build(int start, int end) {
         this.setSubmoduleCode();
 
@@ -69,6 +92,12 @@ public class RequestBuilder {
         }
     }
 
+    /**
+     * Set a {@link com.google.common.eventbus.EventBus} event listener to submodule<br><br>
+     * Every listener should implement {@link SubmoduleEventListener} interface.
+     * @param listener listener instance
+     * @return {@code RequestBuilder} entity contains event listener
+     */
     public RequestBuilder setListener(SubmoduleEventListener listener) {
         this.listener = listener;
         return this;

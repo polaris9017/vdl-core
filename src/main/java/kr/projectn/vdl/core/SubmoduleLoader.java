@@ -21,6 +21,18 @@ import kr.projectn.vdl.core.frame.SubmoduleFrame;
 import java.util.LinkedList;
 import java.util.Queue;
 
+/**
+ * Loader class for loading submodule(s)
+ * <h2>How to use</h2>
+ * <p>To load and run submodule(s), </p>
+ * <ol>
+ *     <li>Pass {@link Request} instance you created in advance while initializing instance;</li>
+ *     <li>Run {@link #run()} method, and this will executes all requested URLs;</li>
+ *     <li>Get result of all requests with {@link #getResponseList()}</li>
+ * </ol>
+ *
+ * @since 1.0
+ */
 public class SubmoduleLoader {
 
     private Request req;
@@ -32,6 +44,10 @@ public class SubmoduleLoader {
         responseFinalMediaSpecList = new LinkedList<>();
     }
 
+    /**
+     * Creates a new {@code SubmoduleLoader} instance.
+     * @param request {@link Request} instance previously created
+     */
     public SubmoduleLoader(Request request) {
         this();
         this.req = request;
@@ -68,6 +84,9 @@ public class SubmoduleLoader {
         }
     }
 
+    /**
+     * Runs all requested URLs and adds into internal list
+     */
     public void run() {
 
         if (requestedSubModule.isEmpty()) {
@@ -80,6 +99,10 @@ public class SubmoduleLoader {
 
     }
 
+    /**
+     * Returns list of result of all requests.
+     * @return queue of result of all requests
+     */
     public Queue<Response> getResponseList() {
         return responseFinalMediaSpecList;
     }
