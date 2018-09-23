@@ -1,6 +1,8 @@
 plugins {
     id 'java'
     id "com.github.hierynomus.license" version "0.14.0"
+    id "com.jfrog.bintray" version "1.8.4"
+    id 'maven-publish'
 }
 
 group 'kr.projectn.vdl'
@@ -47,6 +49,91 @@ javadoc {
     options.links 'https://docs.oracle.com/javase/8/docs/api'
     options.encoding = 'UTF-8'
     options.addBooleanOption('html5', true)
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                from components.java
+                artifact sourcesJar
+                artifact javadocJar
+                groupId project.getGroup()
+                artifactId project.getName()
+                name = 'vdl-core'
+                description = 'vdl core API library'
+                url = 'https://github.com/polaris9017/vdl-core'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'polaris9017'
+                        name = 'polaris9017'
+                        email = 'moonrise917@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'https://github.com/polaris9017/vdl-core.git'
+                    developerConnection = 'https://github.com/polaris9017/vdl-core.git'
+                    url = 'https://github.com/polaris9017/vdl-core'
+                }
+            }
+        }
+    }
+}
+
+bintray {
+    def Properties prop = new Properties()
+    def propFile = file('local.properties')
+    if (propFile.canRead()) {
+        prop.load(new FileInputStream(propFile))
+        if(prop != null && prop.containsKey('bintray.user') && prop.containsKey('bintray.api')) {
+            user = prop['bintray.user']
+            key = prop['bintray.api']
+        }
+    }
+    publications = ['mavenJava']
+
+    pkg {
+        repo = 'vdl'
+        name = project.getName()
+        websiteUrl = 'https://github.com/polaris9017/vdl-core'
+        issueTrackerUrl = 'https://github.com/polaris9017/vdl-core/issues'
+        vcsUrl = 'https://github.com/polaris9017/vdl-core.git'
+        licenses = ['Apache-2.0']
+        labels = ['java']
+        publicDownloadNumbers = true
+        desc = 'vdl core API library'
+
+        //GitHub repo info
+        githubRepo = 'polaris9017/vdl-core'
+        githubReleaseNotesFile = 'README'
+
+        version {
+            name = project.getVersion()
+            desc = 'vdl core API library 1.0 release'
+            released  = new Date()
+            vcsTag = '1.0'
+            gpg {
+                sign = true //Determines whether to GPG sign the files. The default is false
+                passphrase = prop['bintray.api'] //Optional. The passphrase for GPG signing'
+            }
+        }
+    }
 }
 
 dependencies {
