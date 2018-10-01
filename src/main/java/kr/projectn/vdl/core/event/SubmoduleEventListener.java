@@ -42,19 +42,19 @@ public abstract class SubmoduleEventListener {
 
         switch (e.getCurrentMethod()) {
             case "init":
-                onInitPageLoaded();
+                onInitPageLoaded(e);
                 break;
             case "parse":
-                onPageParsed();
+                onPageParsed(e);
                 break;
             case "fetch":
-                onFetchedVideoList();
+                onFetchedVideoList(e);
                 break;
             case "retrieve":
-                onRetrievedMediaSpec();
+                onRetrievedMediaSpec(e);
                 break;
             case "store":
-                onStoredMediaSpec();
+                onStoredMediaSpec(e);
                 break;
             case "error":
                 onError(e);
@@ -68,27 +68,27 @@ public abstract class SubmoduleEventListener {
     /**
      * handle requestInitPage() method
      */
-    public abstract void onInitPageLoaded();
+    public abstract void onInitPageLoaded(SubmoduleEvent e);
 
     /**
      * handle parsePage() method
      */
-    public abstract void onPageParsed();
+    public abstract void onPageParsed(SubmoduleEvent e);
 
     /**
      * handle FetchVideoList() method
      */
-    public abstract void onFetchedVideoList();
+    public abstract void onFetchedVideoList(SubmoduleEvent e);
 
     /**
      * handle retrieveMediaSpec() method
      */
-    public abstract void onRetrievedMediaSpec();
+    public abstract void onRetrievedMediaSpec(SubmoduleEvent e);
 
     /**
      * handle getFinalMediaSpec() method
      */
-    public abstract void onStoredMediaSpec();
+    public abstract void onStoredMediaSpec(SubmoduleEvent e);
 
     /**
      * handle errors

@@ -24,29 +24,28 @@ package kr.projectn.vdl.core.event;
  */
 public class DefaultSubmoduleEventListener extends SubmoduleEventListener {
 
-
     @Override
-    public void onInitPageLoaded() {
+    public void onInitPageLoaded(SubmoduleEvent e) {
 
     }
 
     @Override
-    public void onPageParsed() {
+    public void onPageParsed(SubmoduleEvent e) {
 
     }
 
     @Override
-    public void onFetchedVideoList() {
+    public void onFetchedVideoList(SubmoduleEvent e) {
 
     }
 
     @Override
-    public void onRetrievedMediaSpec() {
+    public void onRetrievedMediaSpec(SubmoduleEvent e) {
 
     }
 
     @Override
-    public void onStoredMediaSpec() {
+    public void onStoredMediaSpec(SubmoduleEvent e) {
 
     }
 
