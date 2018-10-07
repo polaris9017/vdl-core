@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'kr.projectn.vdl'
-version '1.0.1'
+version '1.0.2'
 
 sourceCompatibility = 1.8
 
@@ -125,9 +125,9 @@ bintray {
 
         version {
             name = project.getVersion()
-            desc = 'vdl core API library 1.0.1 release'
+            desc = 'vdl core API library 1.0.2 release'
             released  = new Date()
-            vcsTag = '1.0.1'
+            vcsTag = '1.0.2'
             gpg {
                 sign = true //Determines whether to GPG sign the files. The default is false
                 passphrase = prop['bintray.api'] //Optional. The passphrase for GPG signing'
