@@ -60,6 +60,10 @@ public class vlive_ch extends SubmoduleFrame {
                 .setExpressionString(url)
                 .group()) {
             channelCode = regex.get(1);
+        } else if (regex.setRegexString("https?:\\/\\/channels\\.vlive\\.tv\\/([\\w\\D]+)\\/home")
+                .setExpressionString(url)
+                .group()){
+            channelCode = regex.get(1);
         }
 
         if (regex.setRegexString("<script[^>]+src=[\\\\\"\\'](http.+?\\/app\\.js)")
