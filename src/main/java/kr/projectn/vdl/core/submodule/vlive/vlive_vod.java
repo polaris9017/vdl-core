@@ -15,6 +15,7 @@
  */
 package kr.projectn.vdl.core.submodule.vlive;
 
+import com.google.common.base.Objects;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -81,6 +82,10 @@ public class vlive_vod extends SubmoduleFrame {
                 response.setStatus(ResponseStatus.PRODUCT_ONLY_APP);
         }
 
+        if (Objects.equal(key, "true")) {
+            response.setStatus(ResponseStatus.CH_SUBSCRIBE_NEEDED);
+        }
+
         if (!response.isEmpty()) {
             bus.post(new SubmoduleEvent(this, "error")
                     .setErrorMessage(response.getStatus().getErrorMessage()));
@@ -89,68 +94,72 @@ public class vlive_vod extends SubmoduleFrame {
 
 
     protected void retrieveMediaSpec() {
-        WebClient client = new WebClient();
-        List<NameValuePair> reqParam = new ArrayList<NameValuePair>();
-        String title;
-        Stack<String> videoRes = new Stack<>();
-        Stack<String> cdnUrl = new Stack<>();
-        Stack<Long> fSize = new Stack<>();
+        try {
+            WebClient client = new WebClient();
+            List<NameValuePair> reqParam = new ArrayList<NameValuePair>();
+            String title;
+            Stack<String> videoRes = new Stack<>();
+            Stack<String> cdnUrl = new Stack<>();
+            Stack<Long> fSize = new Stack<>();
 
-        super.retrieveMediaSpec();
+            super.retrieveMediaSpec();
 
-        reqParam.add(new BasicNameValuePair("videoId", vid_long));
-        reqParam.add(new BasicNameValuePair("key", key));
-        reqParam.add(new BasicNameValuePair("ptc", "http"));
-        reqParam.add(new BasicNameValuePair("doct", "json"));
-        reqParam.add(new BasicNameValuePair("cpt", "vtt"));
+            reqParam.add(new BasicNameValuePair("videoId", vid_long));
+            reqParam.add(new BasicNameValuePair("key", key));
+            reqParam.add(new BasicNameValuePair("ptc", "http"));
+            reqParam.add(new BasicNameValuePair("doct", "json"));
+            reqParam.add(new BasicNameValuePair("cpt", "vtt"));
 
-        client.setClientConnection("http://global.apis.naver.com/rmcnmv/rmcnmv/vod_play_videoInfo.json")
-                .setConnectionParameter(reqParam);
+            client.setClientConnection("http://global.apis.naver.com/rmcnmv/rmcnmv/vod_play_videoInfo.json")
+                    .setConnectionParameter(reqParam);
 
-        JsonObject mediaJsonObj = new JsonParser().parse(
-                client.request().getAsString()
-        ).getAsJsonObject();
+            JsonObject mediaJsonObj = new JsonParser().parse(
+                    client.request().getAsString()
+            ).getAsJsonObject();
 
-        if (!(title = mediaJsonObj.get("meta").getAsJsonObject()
-                .get("subject").getAsString()).isEmpty()) {
-            response.setTitle(title);
-        } else {
-            if (regex.setRegexString("og\\:title.+(\\[[^\"]*+)")
-                    .setExpressionString(initPage)
-                    .group()) {
-                response.setTitle(regex.getMatchGroup().get(1));
+            if (!(title = mediaJsonObj.get("meta").getAsJsonObject()
+                    .get("subject").getAsString()).isEmpty()) {
+                response.setTitle(title);
+            } else {
+                if (regex.setRegexString("og\\:title.+(\\[[^\"]*+)")
+                        .setExpressionString(initPage)
+                        .group()) {
+                    response.setTitle(regex.getMatchGroup().get(1));
+                }
             }
-        }
 
-        JsonArray videoSpecList = mediaJsonObj.get("videos")
-                .getAsJsonObject().getAsJsonArray("list");
+            JsonArray videoSpecList = mediaJsonObj.get("videos")
+                    .getAsJsonObject().getAsJsonArray("list");
 
-        for (JsonElement it : videoSpecList) {
-            JsonObject obj = it.getAsJsonObject();
-
-            videoRes.push(obj.get("encodingOption").getAsJsonObject()
-                    .get("name").getAsString());
-            cdnUrl.push(obj.get("source").getAsString());
-            fSize.push(obj.get("size").getAsLong());
-        }
-
-        if (mediaJsonObj.has("captions")) {
-            JsonArray subtitleList = mediaJsonObj.get("captions")
-                    .getAsJsonObject().get("list").getAsJsonArray();
-
-            for (JsonElement it : subtitleList) {
+            for (JsonElement it : videoSpecList) {
                 JsonObject obj = it.getAsJsonObject();
 
-                response.setSubtitle(obj.get("locale").getAsString(), obj.get("source").getAsString());
+                videoRes.push(obj.get("encodingOption").getAsJsonObject()
+                        .get("name").getAsString());
+                cdnUrl.push(obj.get("source").getAsString());
+                fSize.push(obj.get("size").getAsLong());
             }
-        } else {
-            response.setSubtitle("", "");
+
+            if (mediaJsonObj.has("captions")) {
+                JsonArray subtitleList = mediaJsonObj.get("captions")
+                        .getAsJsonObject().get("list").getAsJsonArray();
+
+                for (JsonElement it : subtitleList) {
+                    JsonObject obj = it.getAsJsonObject();
+
+                    response.setSubtitle(obj.get("locale").getAsString(), obj.get("source").getAsString());
+                }
+            } else {
+                response.setSubtitle("", "");
+            }
+
+
+            response.setUrl(cdnUrl.pop());
+            response.setResolution(videoRes.pop());
+            response.setSize(fSize.pop());
+        } catch (Exception e) {
+            bus.post(new SubmoduleEvent(this, "error").setException(e));
         }
-
-
-        response.setUrl(cdnUrl.pop());
-        response.setResolution(videoRes.pop());
-        response.setSize(fSize.pop());
     }
 
 

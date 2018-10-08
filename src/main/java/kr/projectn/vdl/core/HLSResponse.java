@@ -54,7 +54,7 @@ public class HLSResponse extends Response {
     /**
      * Creates a new {@code HLSResponse}
      */
-    public HLSResponse() {
+    public HLSResponse() throws Exception {
         super();
         header = new HashMap<>();
         client = new WebClient();
@@ -100,7 +100,7 @@ public class HLSResponse extends Response {
      * @return {@code true} if successfully get video segment
      */
     //TODO: Change the way to get segment to handle at ffmpeg from current way.
-    public boolean getHLSSegment() {
+    public boolean getHLSSegment() throws Exception {
 
         int seq_prev = seq; //previous sequence
         String liveJsonStr;

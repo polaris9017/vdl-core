@@ -27,6 +27,7 @@ import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -34,6 +35,8 @@ import org.apache.http.ssl.SSLContextBuilder;
 
 import javax.net.ssl.SSLContext;
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -53,19 +56,17 @@ public class WebClient {
     private URI uri;
     private Map<String, String> customHeader;
     private Response responseEntity;
+    private static BasicCookieStore cookieStore;
 
     /**
      * Create new {@code WebClient} and set required settings
      */
-    public WebClient() {
+    public WebClient() throws Exception {
         strUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36";
         builder = new URIBuilder();
+        cookieStore = new BasicCookieStore();
 
-        try {
-            execEntity = Executor.newInstance(WebClient.ignoreRequestSSLError());
-        } catch (Exception e) {
-            System.exit(0);
-        }
+        execEntity = Executor.newInstance(WebClient.ignoreRequestSSLError());
 
         customHeader = new HashMap<>();
     }
@@ -78,7 +79,7 @@ public class WebClient {
      * @param reqMethod request REST API type
      * @return {@link WebClient} entity contains response from web
      */
-    public WebClient request(String reqMethod) {
+    public WebClient request(String reqMethod) throws IOException {
 
         Request reqEntity = null;
 
@@ -99,12 +100,7 @@ public class WebClient {
                 reqEntity.addHeader(el.getKey(), el.getValue());
             }
         }
-
-        try {
-            responseEntity = execEntity.execute(reqEntity);
-        } catch (Exception e) {
-            System.exit(0);
-        }
+        responseEntity = execEntity.execute(reqEntity);
 
         return this;
     }
@@ -118,7 +114,7 @@ public class WebClient {
      * @param header additional header
      * @return {@link WebClient} entity contains response from web
      */
-    public WebClient request(String reqMethod, Map<String, String> header) {
+    public WebClient request(String reqMethod, Map<String, String> header) throws IOException {
         customHeader = header;
         this.request(reqMethod);
         return this;
@@ -129,7 +125,7 @@ public class WebClient {
      * For {@link WebClient} {@code c}, the expressions {@code c.request("get")} and {@code c.request()} is equivalent.
      * @return {@link WebClient} entity contains response from web
      */
-    public WebClient request() {
+    public WebClient request() throws IOException {
         this.request("get");
         return this;
     }
@@ -141,7 +137,7 @@ public class WebClient {
      * @param header additional header
      * @return {@link WebClient} entity contains response from web
      */
-    public WebClient request(Map<String, String> header) {
+    public WebClient request(Map<String, String> header) throws IOException {
         this.request("get", header);
         return this;
     }
@@ -151,27 +147,22 @@ public class WebClient {
      * @param url destination URL
      * @return {@link WebClient} entity contains destination URL
      */
-    public WebClient setClientConnection(String url) {
-        try {
-            URL urlContainer = new URL(Optional.ofNullable(url).orElse(""));
-            Optional<String> protocol;
-            customHeader = new HashMap<>();
-            builder = new URIBuilder();
+    public WebClient setClientConnection(String url) throws MalformedURLException, URISyntaxException {
+        URL urlContainer = new URL(Optional.ofNullable(url).orElse(""));
+        Optional<String> protocol;
+        customHeader = new HashMap<>();
+        builder = new URIBuilder();
 
-            if (new UrlValidator().isValid(urlContainer.toString())) {
-                protocol = Optional.ofNullable(urlContainer.getProtocol());
-                builder = builder.setScheme(protocol.orElse("http"))
-                        .setHost(urlContainer.getHost())
-                        .setPort(urlContainer.getPort())
-                        .setPath(urlContainer.getPath())
-                        .setCustomQuery(urlContainer.getQuery());
-            }
-
-            uri = builder.build();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            System.exit(0);
+        if (new UrlValidator().isValid(urlContainer.toString())) {
+            protocol = Optional.ofNullable(urlContainer.getProtocol());
+            builder = builder.setScheme(protocol.orElse("http"))
+                    .setHost(urlContainer.getHost())
+                    .setPort(urlContainer.getPort())
+                    .setPath(urlContainer.getPath())
+                    .setCustomQuery(urlContainer.getQuery());
         }
+
+        uri = builder.build();
 
         return this;
     }
@@ -182,13 +173,10 @@ public class WebClient {
      * @param param URL parameter
      * @return {@link WebClient} entity contains URL parameter
      */
-    public WebClient setConnectionParameter(List<NameValuePair> param) {
-        try {
-            builder = builder.setParameters(param);
-            uri = builder.build();
-        } catch (URISyntaxException e) {
-            System.exit(0);
-        }
+    public WebClient setConnectionParameter(List<NameValuePair> param) throws URISyntaxException {
+        builder = builder.setParameters(param);
+        uri = builder.build();
+
         return this;
     }
 
@@ -230,6 +218,7 @@ public class WebClient {
                                                 NoopHostnameVerifier.INSTANCE))
                                         .build()
                         ))
+                .setDefaultCookieStore(cookieStore)
                 .build();
     }
 
@@ -238,25 +227,17 @@ public class WebClient {
      * This method is suitable for plain HTML body, not for binary response.
      * @return response body string
      */
-    public String getAsString() {
-        try {
-            return responseEntity.returnContent().asString();
-        } catch (Exception e) {
-            System.exit(0);
-        }
-        return null;
+    public String getAsString() throws IOException {
+        return responseEntity.returnContent().asString();
     }
 
     /**
      * Writes response body into file with {@code title} as file name.<br><br>
      * This method is suitable for both plain HTML body and binary responses.
      * @param title file name you desire to write
+     * @throws IOException
      */
-    public void writeFile(String title) {
-        try {
-            responseEntity.saveContent(new File(title));
-        } catch (Exception e) {
-            System.exit(0);
-        }
+    public void writeFile(String title) throws IOException {
+        responseEntity.saveContent(new File(title));
     }
 }

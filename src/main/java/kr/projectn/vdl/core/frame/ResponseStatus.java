@@ -28,6 +28,7 @@ public enum ResponseStatus {
     LIVE_COMING_SOON("Live bradcasting is in preparation."),
     LIVE_CANCELED("Live broadcasting has been ended unexpectedly."),
     PRODUCT_ONLY_APP("You have to buy package."),
+    CH_SUBSCRIBE_NEEDED("Does not support subscribe required channel."),
     INSTA_NO_POST("Cannot load post from URL.");
 
     String msg;

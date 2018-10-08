@@ -18,6 +18,7 @@ package kr.projectn.vdl.core.submodule.kakao;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import kr.projectn.vdl.core.Request;
+import kr.projectn.vdl.core.event.SubmoduleEvent;
 import kr.projectn.vdl.core.util.Regex;
 import kr.projectn.vdl.core.util.WebClient;
 
@@ -34,28 +35,32 @@ public class kakao extends tvpot {
     }
 
     protected void requestInitPage() {
-        String vid;
-        JsonObject kakaoApiJson;
-        Regex regex = new Regex();
-        WebClient client = new WebClient();
+        try {
+            String vid;
+            JsonObject kakaoApiJson;
+            Regex regex = new Regex();
+            WebClient client = new WebClient();
 
-        if (regex.setRegexString("tv\\.kakao\\.com.+cliplink\\/(.*)")
-                .setExpressionString(url)
-                .group()) {
-            clipid = regex.get(1);
+            if (regex.setRegexString("tv\\.kakao\\.com.+cliplink\\/(.*)")
+                    .setExpressionString(url)
+                    .group()) {
+                clipid = regex.get(1);
+            }
+
+            client.setClientConnection("http://tv.kakao.com/api/v1/ft/cliplinks/" + clipid)
+                    .request();
+
+            kakaoApiJson = new JsonParser().parse(client.getAsString()).getAsJsonObject();
+
+            vid = kakaoApiJson.get("clip").getAsJsonObject().get("vid").getAsString();
+
+            response.setTitle(kakaoApiJson.get("displayTitle").getAsString());
+
+            url = "http://tvpot.daum.net" + "/v/" + vid;
+
+            super.requestInitPage();
+        } catch (Exception e) {
+            bus.post(new SubmoduleEvent(this, "error").setException(e));
         }
-
-        client.setClientConnection("http://tv.kakao.com/api/v1/ft/cliplinks/" + clipid)
-                .request();
-
-        kakaoApiJson = new JsonParser().parse(client.getAsString()).getAsJsonObject();
-
-        vid = kakaoApiJson.get("clip").getAsJsonObject().get("vid").getAsString();
-
-        response.setTitle(kakaoApiJson.get("displayTitle").getAsString());
-
-        url = "http://tvpot.daum.net" + "/v/" + vid;
-
-        super.requestInitPage();
     }
 }

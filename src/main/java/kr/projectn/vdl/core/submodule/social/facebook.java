@@ -19,6 +19,7 @@ package kr.projectn.vdl.core.submodule.social;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import kr.projectn.vdl.core.Request;
+import kr.projectn.vdl.core.event.SubmoduleEvent;
 import kr.projectn.vdl.core.frame.ResponseStatus;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
 import kr.projectn.vdl.core.util.Regex;
@@ -26,6 +27,8 @@ import kr.projectn.vdl.core.util.WebClient;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,28 +41,37 @@ public class facebook extends SubmoduleFrame {
 
     public facebook(Request req) {
         super(req);
-        client = new WebClient();
+        try {
+            client = new WebClient();
+        } catch (Exception e) {
+            bus.post(new SubmoduleEvent(this, "error").setException(e));
+        }
     }
 
     @Override
 
 
     protected void requestInitPage() {
-        List<NameValuePair> param = new ArrayList<>();
+        try {
+            List<NameValuePair> param = new ArrayList<>();
 
-        param.add(new BasicNameValuePair("client_id", "841023869361760"));
-        param.add(new BasicNameValuePair("client_secret", "e742f0e162c7f0cf412c80434f07a95c"));
-        param.add(new BasicNameValuePair("grant_type", "client_credentials"));
+            param.add(new BasicNameValuePair("client_id", "841023869361760"));
+            param.add(new BasicNameValuePair("client_secret", "e742f0e162c7f0cf412c80434f07a95c"));
+            param.add(new BasicNameValuePair("grant_type", "client_credentials"));
 
-        token = new JsonParser().parse(client
-                .setClientConnection("https://graph.facebook.com/oauth/access_token")
-                .setConnectionParameter(param)
-                .request()
-                .getAsString())
-                .getAsJsonObject().get("access_token")
-                .getAsString();
+            token = new JsonParser().parse(client
+                    .setClientConnection("https://graph.facebook.com/oauth/access_token")
+                    .setConnectionParameter(param)
+                    .request()
+                    .getAsString())
+                    .getAsJsonObject().get("access_token")
+                    .getAsString();
+            super.requestInitPage();
+        } catch (IOException | URISyntaxException e) {
+            bus.post(new SubmoduleEvent(this, "error").setException(e));
+        }
 
-        super.requestInitPage();
+
     }
 
     @Override
@@ -75,21 +87,25 @@ public class facebook extends SubmoduleFrame {
 
     @Override
     protected void retrieveMediaSpec() {
-        List<NameValuePair> param = new ArrayList<>();
-        JsonObject jsonObj;
+        try {
+            List<NameValuePair> param = new ArrayList<>();
+            JsonObject jsonObj;
 
-        param.add(new BasicNameValuePair("fields", "source,title"));
-        param.add(new BasicNameValuePair("access_token", token));
+            param.add(new BasicNameValuePair("fields", "source,title"));
+            param.add(new BasicNameValuePair("access_token", token));
 
-        client.setClientConnection("https://graph.facebook.com/v2.10/" + vid)
-                .setConnectionParameter(param)
-                .request();
+            client.setClientConnection("https://graph.facebook.com/v2.10/" + vid)
+                    .setConnectionParameter(param)
+                    .request();
 
-        jsonObj = new JsonParser().parse(client.getAsString()).getAsJsonObject();
+            jsonObj = new JsonParser().parse(client.getAsString()).getAsJsonObject();
 
-        response.setUrl(jsonObj.get("source").getAsString());
-        response.setTitle(jsonObj.get("title").getAsString());
-        response.setSvctype(moduleStr);
+            response.setUrl(jsonObj.get("source").getAsString());
+            response.setTitle(jsonObj.get("title").getAsString());
+            response.setSvctype(moduleStr);
+        } catch (IOException | URISyntaxException e) {
+            bus.post(new SubmoduleEvent(this, "error").setException(e));
+        }
     }
 
     @Override
