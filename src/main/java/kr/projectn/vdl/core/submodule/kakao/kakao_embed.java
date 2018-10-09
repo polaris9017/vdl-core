@@ -15,5 +15,19 @@
  */
 package kr.projectn.vdl.core.submodule.kakao;
 
-public class kakao_embed {
+import kr.projectn.vdl.core.Request;
+import kr.projectn.vdl.core.SubmoduleLoader;
+import kr.projectn.vdl.core.frame.SubmoduleFrame;
+
+@Deprecated
+public class kakao_embed extends SubmoduleFrame {
+    /**
+     * Creates new submodule instance with single {@link Request} entity passed from
+     * {@link SubmoduleLoader}
+     *
+     * @param req {@link Request} entity
+     */
+    public kakao_embed(Request req) {
+        super(req);
+    }
 }
