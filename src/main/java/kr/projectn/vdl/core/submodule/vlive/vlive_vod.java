@@ -147,10 +147,10 @@ public class vlive_vod extends SubmoduleFrame {
                 for (JsonElement it : subtitleList) {
                     JsonObject obj = it.getAsJsonObject();
 
-                    response.setSubtitle(obj.get("locale").getAsString(), obj.get("source").getAsString());
+                    response.setSubtitle(url, obj.get("locale").getAsString(), obj.get("source").getAsString());
                 }
             } else {
-                response.setSubtitle("", "");
+                response.setSubtitle(url, "", "");
             }
 
 
