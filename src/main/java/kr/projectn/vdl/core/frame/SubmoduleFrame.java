@@ -42,7 +42,7 @@ public abstract class SubmoduleFrame {
     protected Response response;
     protected String moduleStr;
     protected EventBus bus;
-    private SubmoduleEventListener listener;
+    protected SubmoduleEventListener listener;
 
     private SubmoduleFrame(SubmoduleCode subCode) {
         moduleStr = subCode.getSvcType();
@@ -85,13 +85,17 @@ public abstract class SubmoduleFrame {
      * Store plain {@code String} of page body into {@code initPage} variable after request.
      */
     protected void requestInitPage() {
-        WebClient client = new WebClient();
+        try {
+            WebClient client = new WebClient();
 
-        bus.post(new SubmoduleEvent(this, "init"));
+            bus.post(new SubmoduleEvent(this, "init"));
 
-        initPage = client.setClientConnection(this.url)
-                .request()
-                .getAsString();
+            initPage = client.setClientConnection(this.url)
+                    .request()
+                    .getAsString();
+        } catch (Exception e) {
+            bus.post(new SubmoduleEvent(this, "error").setException(e));
+        }
     }
 
     /**

@@ -23,6 +23,7 @@ package kr.projectn.vdl.core.submodule.vlive;
 
 import kr.projectn.vdl.core.HLSResponse;
 import kr.projectn.vdl.core.Request;
+import kr.projectn.vdl.core.event.SubmoduleEvent;
 import kr.projectn.vdl.core.frame.ResponseStatus;
 import kr.projectn.vdl.core.frame.ServiceType;
 import kr.projectn.vdl.core.frame.SubmoduleFrame;
@@ -34,7 +35,7 @@ import java.util.Map;
 
 class vlive_Realtime extends SubmoduleFrame {
     private Map<String, String> header = new HashMap<String, String>(); //header
-    private HLSResponse hlsResponse = new HLSResponse();
+    private HLSResponse hlsResponse;
     private LinkedList<String> param = new LinkedList<>();
     private String vid;
 
@@ -47,6 +48,11 @@ class vlive_Realtime extends SubmoduleFrame {
 
     protected void parsePage() {
         Regex regex = new Regex();
+        try {
+            hlsResponse = new HLSResponse();
+        } catch (Exception e) {
+            bus.post(new SubmoduleEvent(this, "error").setException(e));
+        }
 
         super.parsePage();
 

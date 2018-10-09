@@ -62,51 +62,54 @@ public class naver extends SubmoduleFrame {
 
 
     protected void retrieveMediaSpec() {
-        WebClient client = new WebClient();
-        List<NameValuePair> reqParam = new ArrayList<NameValuePair>();
-        String title;
-        Stack<String> videoRes = new Stack<>();
-        Stack<String> cdnUrl = new Stack<>();
-        Stack<Long> fSize = new Stack<>();
+        try {
+            WebClient client = new WebClient();
+            List<NameValuePair> reqParam = new ArrayList<NameValuePair>();
+            String title;
+            Stack<String> videoRes = new Stack<>();
+            Stack<String> cdnUrl = new Stack<>();
+            Stack<Long> fSize = new Stack<>();
 
-        super.retrieveMediaSpec();
+            super.retrieveMediaSpec();
 
-        reqParam.add(new BasicNameValuePair("key", key));
+            reqParam.add(new BasicNameValuePair("key", key));
 
-        client.setClientConnection("http://play.rmcnmv.naver.com/vod/play/v2.0/" + mid)
-                .setConnectionParameter(reqParam);
+            client.setClientConnection("http://play.rmcnmv.naver.com/vod/play/v2.0/" + mid)
+                    .setConnectionParameter(reqParam);
 
-        JsonObject mediaJsonObj = new JsonParser().parse(
-                client.request().getAsString()
-        ).getAsJsonObject();
+            JsonObject mediaJsonObj = new JsonParser().parse(
+                    client.request().getAsString()
+            ).getAsJsonObject();
 
-        if (!(title = mediaJsonObj.get("meta").getAsJsonObject()
-                .get("subject").getAsString()).isEmpty()) {
-            response.setTitle(title);
-        } else {
-            if (regex.setRegexString("og\\:title.+(\\[[^\"]*+)")
-                    .setExpressionString(initPage)
-                    .group()) {
-                response.setTitle(regex.get(1));
+            if (!(title = mediaJsonObj.get("meta").getAsJsonObject()
+                    .get("subject").getAsString()).isEmpty()) {
+                response.setTitle(title);
+            } else {
+                if (regex.setRegexString("og\\:title.+(\\[[^\"]*+)")
+                        .setExpressionString(initPage)
+                        .group()) {
+                    response.setTitle(regex.get(1));
+                }
             }
+
+            JsonArray videoSpecList = mediaJsonObj.get("videos")
+                    .getAsJsonObject().getAsJsonArray("list");
+
+            for (JsonElement it : videoSpecList) {
+                JsonObject obj = it.getAsJsonObject();
+
+                videoRes.push(obj.get("encodingOption").getAsJsonObject()
+                        .get("name").getAsString());
+                cdnUrl.push(obj.get("source").getAsString());
+                fSize.push(obj.get("size").getAsLong());
+            }
+
+            response.setUrl(cdnUrl.pop());
+            response.setResolution(videoRes.pop());
+            response.setSize(fSize.pop());
+        } catch (Exception e) {
+            bus.post(new SubmoduleEvent(this, "error").setException(e));
         }
-
-        JsonArray videoSpecList = mediaJsonObj.get("videos")
-                .getAsJsonObject().getAsJsonArray("list");
-
-        for (JsonElement it : videoSpecList) {
-            JsonObject obj = it.getAsJsonObject();
-
-            videoRes.push(obj.get("encodingOption").getAsJsonObject()
-                    .get("name").getAsString());
-            cdnUrl.push(obj.get("source").getAsString());
-            fSize.push(obj.get("size").getAsLong());
-        }
-
-        response.setUrl(cdnUrl.pop());
-        response.setResolution(videoRes.pop());
-        response.setSize(fSize.pop());
-
     }
 
 

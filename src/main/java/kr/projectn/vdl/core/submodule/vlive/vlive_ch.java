@@ -51,33 +51,37 @@ public class vlive_ch extends SubmoduleFrame {
     }
 
     public void parsePage() {
-        Regex regex = new Regex();
-        WebClient client = new WebClient();
+        try {
+            Regex regex = new Regex();
+            WebClient client = new WebClient();
 
-        super.parsePage();
+            super.parsePage();
 
-        if (regex.setRegexString("https?:\\/\\/channels\\.vlive\\.tv\\/([\\w\\D]+)\\/video")
-                .setExpressionString(url)
-                .group()) {
-            channelCode = regex.get(1);
-        } else if (regex.setRegexString("https?:\\/\\/channels\\.vlive\\.tv\\/([\\w\\D]+)\\/home")
-                .setExpressionString(url)
-                .group()){
-            channelCode = regex.get(1);
-        }
+            if (regex.setRegexString("https?:\\/\\/channels\\.vlive\\.tv\\/([\\w\\D]+)\\/video")
+                    .setExpressionString(url)
+                    .group()) {
+                channelCode = regex.get(1);
+            } else if (regex.setRegexString("https?:\\/\\/channels\\.vlive\\.tv\\/([\\w\\D]+)\\/home")
+                    .setExpressionString(url)
+                    .group()){
+                channelCode = regex.get(1);
+            }
 
-        if (regex.setRegexString("<script[^>]+src=[\\\\\"\\'](http.+?\\/app\\.js)")
-                .setExpressionString(initPage)
-                .group()) {
-            appJsUrl = regex.get(1);
-        }
+            if (regex.setRegexString("<script[^>]+src=[\\\\\"\\'](http.+?\\/app\\.js)")
+                    .setExpressionString(initPage)
+                    .group()) {
+                appJsUrl = regex.get(1);
+            }
 
-        if (regex.setRegexString("a\\.VFAN_APP_ID=\"(.+)\",a\\.POSTABLE_COUNTRIES")
-                .setExpressionString(client.setClientConnection(appJsUrl)
-                        .request()
-                        .getAsString())
-                .group()) {
-            appID = regex.get(1);
+            if (regex.setRegexString("a\\.VFAN_APP_ID=\"(.+)\",a\\.POSTABLE_COUNTRIES")
+                    .setExpressionString(client.setClientConnection(appJsUrl)
+                            .request()
+                            .getAsString())
+                    .group()) {
+                appID = regex.get(1);
+            }
+        } catch (Exception e) {
+            bus.post(new SubmoduleEvent(this, "error").setException(e));
         }
     }
 
@@ -100,7 +104,7 @@ public class vlive_ch extends SubmoduleFrame {
 
             Response resp = new vlive_vod(
                     new RequestBuilder()
-                            .setUrl(url).build()).run();
+                            .setUrl(url).setListener(listener).build()).run();
 
             response.setUrl(resp.getUrlList().peek());
             response.setTitle(resp.getTitleList().peek());
@@ -123,40 +127,44 @@ public class vlive_ch extends SubmoduleFrame {
     }
 
     private void FetchVideoList() {
-        int channelSeq;
-        List<NameValuePair> param = new ArrayList<>();
-        WebClient client = new WebClient();
+        try {
+            int channelSeq;
+            List<NameValuePair> param = new ArrayList<>();
+            WebClient client = new WebClient();
 
-        bus.post(new SubmoduleEvent(this, "fetch"));
+            bus.post(new SubmoduleEvent(this, "fetch"));
 
-        param.add(new BasicNameValuePair("app_id", appID));
-        param.add(new BasicNameValuePair("channelCode", channelCode));
+            param.add(new BasicNameValuePair("app_id", appID));
+            param.add(new BasicNameValuePair("channelCode", channelCode));
 
-        client.setClientConnection("http://api.vfan.vlive.tv/vproxy/channelplus/decodeChannelCode")
-                .setConnectionParameter(param)
-                .request();
+            client.setClientConnection("http://api.vfan.vlive.tv/vproxy/channelplus/decodeChannelCode")
+                    .setConnectionParameter(param)
+                    .request();
 
-        channelSeq = new JsonParser().parse(client.getAsString()).getAsJsonObject()
-                .get("result").getAsJsonObject().get("channelSeq").getAsInt();
+            channelSeq = new JsonParser().parse(client.getAsString()).getAsJsonObject()
+                    .get("result").getAsJsonObject().get("channelSeq").getAsInt();
 
-        param.clear();
+            param.clear();
 
-        param.add(new BasicNameValuePair("app_id", appID));
-        param.add(new BasicNameValuePair("channelSeq", String.valueOf(channelSeq)));
-        param.add(new BasicNameValuePair("maxNumOfRows", String.valueOf(10000)));
+            param.add(new BasicNameValuePair("app_id", appID));
+            param.add(new BasicNameValuePair("channelSeq", String.valueOf(channelSeq)));
+            param.add(new BasicNameValuePair("maxNumOfRows", String.valueOf(10000)));
 
-        client.setClientConnection("http://api.vfan.vlive.tv/vproxy/channelplus/getChannelVideoList")
-                .setConnectionParameter(param)
-                .request();
+            client.setClientConnection("http://api.vfan.vlive.tv/vproxy/channelplus/getChannelVideoList")
+                    .setConnectionParameter(param)
+                    .request();
 
-        JsonArray jsonVideoList = new JsonParser().parse(client.getAsString())
-                .getAsJsonObject().get("result").getAsJsonObject()
-                .get("videoList").getAsJsonArray();
+            JsonArray jsonVideoList = new JsonParser().parse(client.getAsString())
+                    .getAsJsonObject().get("result").getAsJsonObject()
+                    .get("videoList").getAsJsonArray();
 
-        for (JsonElement el : jsonVideoList) {
-            JsonObject obj = el.getAsJsonObject();
+            for (JsonElement el : jsonVideoList) {
+                JsonObject obj = el.getAsJsonObject();
 
-            urlList.offer("http://vlive.tv/video/" + obj.get("videoSeq").getAsString());
+                urlList.offer("http://vlive.tv/video/" + obj.get("videoSeq").getAsString());
+            }
+        } catch (Exception e) {
+
         }
     }
 }

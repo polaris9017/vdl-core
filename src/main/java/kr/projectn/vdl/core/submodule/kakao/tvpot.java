@@ -65,65 +65,69 @@ public class tvpot extends SubmoduleFrame {
 
     @Override
     protected void retrieveMediaSpec() {
-        JsonArray metaData;
-        JsonObject jsonObject;
-        WebClient client = new WebClient();
-        List<NameValuePair> param = new ArrayList<NameValuePair>();
-        Stack<String> videoRes = new Stack<>();
-        Stack<String> cdnUrl = new Stack<>();
-        Stack<Long> fSize = new Stack<>();
+        try {
+            JsonArray metaData;
+            JsonObject jsonObject;
+            WebClient client = new WebClient();
+            List<NameValuePair> param = new ArrayList<NameValuePair>();
+            Stack<String> videoRes = new Stack<>();
+            Stack<String> cdnUrl = new Stack<>();
+            Stack<Long> fSize = new Stack<>();
 
-        super.retrieveMediaSpec();
-
-        param.add(new BasicNameValuePair("vid", vid));
-        param.add(new BasicNameValuePair("dte_type", "WEB"));
-
-
-        client.setClientConnection("http://videofarm.daum.net/controller/api/closed/v1_2/IntegratedMovieData.json")
-                .setConnectionParameter(param)
-                .request();
-
-        jsonObject = new JsonParser().parse(client.getAsString()).getAsJsonObject();
-        metaData = jsonObject.get("output_list").getAsJsonObject()
-                .get("output_list").getAsJsonArray();
-
-        for (JsonElement it : metaData) {
-            JsonObject obj = it.getAsJsonObject();
-
-            videoRes.push(obj.get("label").getAsString());
-            fSize.push(obj.get("filesize").getAsLong());
+            super.retrieveMediaSpec();
 
             param.add(new BasicNameValuePair("vid", vid));
-            param.add(new BasicNameValuePair("profile", obj.get("profile").getAsString()));
+            param.add(new BasicNameValuePair("dte_type", "WEB"));
 
-            XmlHandler handler = new XmlHandler(
-                    "http://videofarm.daum.net/controller/api/open/v1_2/MovieLocation.apixml"
-                    , param);
 
-            handler.parse();
-
-            cdnUrl.push(handler.getUrl());
-
-            param.clear();
-        }
-
-        if (response.getTitleList().isEmpty()) {
-            param.add(new BasicNameValuePair("vid", vid));
-
-            client.setClientConnection("http://tvpot.daum.net/clip/ClipInfoXml.do")
+            client.setClientConnection("http://videofarm.daum.net/controller/api/closed/v1_2/IntegratedMovieData.json")
                     .setConnectionParameter(param)
                     .request();
 
-            XmlHandler handler = new XmlHandler(client.getAsString());
+            jsonObject = new JsonParser().parse(client.getAsString()).getAsJsonObject();
+            metaData = jsonObject.get("output_list").getAsJsonObject()
+                    .get("output_list").getAsJsonArray();
 
-            handler.parse();
+            for (JsonElement it : metaData) {
+                JsonObject obj = it.getAsJsonObject();
 
-            response.setTitle(handler.getTitle());
+                videoRes.push(obj.get("label").getAsString());
+                fSize.push(obj.get("filesize").getAsLong());
+
+                param.add(new BasicNameValuePair("vid", vid));
+                param.add(new BasicNameValuePair("profile", obj.get("profile").getAsString()));
+
+                XmlHandler handler = new XmlHandler(
+                        "http://videofarm.daum.net/controller/api/open/v1_2/MovieLocation.apixml"
+                        , param);
+
+                handler.parse();
+
+                cdnUrl.push(handler.getUrl());
+
+                param.clear();
+            }
+
+            if (response.getTitleList().isEmpty()) {
+                param.add(new BasicNameValuePair("vid", vid));
+
+                client.setClientConnection("http://tvpot.daum.net/clip/ClipInfoXml.do")
+                        .setConnectionParameter(param)
+                        .request();
+
+                XmlHandler handler = new XmlHandler(client.getAsString());
+
+                handler.parse();
+
+                response.setTitle(handler.getTitle());
+            }
+
+            response.setUrl(cdnUrl.pop());
+            response.setResolution(videoRes.pop());
+            response.setSize(fSize.pop());
+        } catch (Exception e) {
+            bus.post(new SubmoduleEvent(this, "error").setException(e));
         }
-
-        response.setUrl(cdnUrl.pop());
-        response.setResolution(videoRes.pop());
-        response.setSize(fSize.pop());
     }
 
     @Override
@@ -159,7 +163,7 @@ public class tvpot extends SubmoduleFrame {
             }
         }
 
-        public XmlHandler(String url, List<NameValuePair> param) {
+        public XmlHandler(String url, List<NameValuePair> param) throws Exception {
             this(new WebClient().setClientConnection(url)
                     .setConnectionParameter(param)
                     .request()

@@ -48,38 +48,34 @@ public class SubmoduleLoader {
      * Creates a new {@code SubmoduleLoader} instance.
      * @param request {@link Request} instance previously created
      */
-    public SubmoduleLoader(Request request) {
+    public SubmoduleLoader(Request request) throws Exception {
         this();
         this.req = request;
         this.loadModule();
     }
 
-    private void loadModule() {
+    private void loadModule() throws Exception {
         SubmoduleCode subCode;
 
         while (!req.isURLListEmpty()) {
-            try {
-                subCode = req.getSubmoduleCode();
+            subCode = req.getSubmoduleCode();
 
-                if (!subCode.name().matches("MODULE_NONE")) {
-                    Class<?> sub = Class.forName("kr.projectn.vdl.core.submodule." +
-                            subCode.getSubCode() + "." + subCode.getSvcType());
+            if (!subCode.name().matches("MODULE_NONE")) {
+                Class<?> sub = Class.forName("kr.projectn.vdl.core.submodule." +
+                        subCode.getSubCode() + "." + subCode.getSvcType());
 
-                    /*
-                     * taken from https://stackoverflow.com/questions/46393863/what-to-use-instead-of-class-newinstance
-                     *
-                     * Class.newInstance() has been deprecated since Java 9, so prefer using
-                     * Class.getDeclaredConstructor().newInstance() instead.
-                     */
-                    Object subInstance = sub.getDeclaredConstructor(Request.class)
-                            .newInstance(new RequestBuilder().setUrl(req.getUrl())
-                                    .setListener(req.getListener()).build(req.getStart(), req.getEnd()));
-                    requestedSubModule.offer((SubmoduleFrame) subInstance);
-                } else {
-                    req.getUrl();  //remove url from list
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+                /*
+                 * taken from https://stackoverflow.com/questions/46393863/what-to-use-instead-of-class-newinstance
+                 *
+                 * Class.newInstance() has been deprecated since Java 9, so prefer using
+                 * Class.getDeclaredConstructor().newInstance() instead.
+                 */
+                Object subInstance = sub.getDeclaredConstructor(Request.class)
+                        .newInstance(new RequestBuilder().setUrl(req.getUrl())
+                                .setListener(req.getListener()).build(req.getStart(), req.getEnd()));
+                requestedSubModule.offer((SubmoduleFrame) subInstance);
+            } else {
+                req.getUrl();  //remove url from list
             }
         }
     }
