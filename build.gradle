@@ -26,8 +26,9 @@ repositories {
 
 license {
     strictCheck true
+    header = project.file("gradle.LICENSE")
     ext.year = '2016-' + Calendar.getInstance().get(Calendar.YEAR)
-    ext.name = 'qscx9512'
+    ext.name = 'polaris9017'
     ext.email = 'moonrise917@gmail.com'
 
     exclude "test/*"
@@ -107,6 +108,7 @@ bintray {
         }
     }
     publications = ['mavenJava']
+    //dryRun = true
 
     pkg {
         repo = 'vdl'
